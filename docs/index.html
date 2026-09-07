@@ -157,7 +157,8 @@
         <h1>The part of the boat you never see<em>.</em></h1>
         <p class="thesis">A keel keeps the hull on course when the wind pushes sideways. keel does that for Codex, Claude Code, Gemini CLI, Cursor, Copilot, OpenCode, Aider and Pi.</p>
         <div class="install"><s>$</s> git clone https://github.com/matrixfede/keel.git /tmp/keel
-<s>$</s> cp -r /tmp/keel/{AGENTS.md,docs,prompts,adapters,scripts,PLAN.template.md,PROGRESS.template.md} .
+<s>$</s> cp -r /tmp/keel/{AGENTS.md,prompts,adapters,scripts,PLAN.template.md,PROGRESS.template.md} .
+<s>$</s> mkdir -p docs &amp;&amp; cp /tmp/keel/docs/AGENT_SOP.md docs/
 <s>$</s> bash scripts/install_git_hook.sh        <b># 4 deterministic checks, any agent</b>
 <s>$</s> bash adapters/install_adapter.sh claude  <b># only if the agent doesn't read AGENTS.md</b></div>
       </div>

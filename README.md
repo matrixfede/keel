@@ -49,7 +49,8 @@ tests/run_tests.sh             # 61 end-to-end checks, no agent or network neede
 ```bash
 git clone https://github.com/matrixfede/keel.git /tmp/keel
 cd /path/to/your/project
-cp -r /tmp/keel/{AGENTS.md,docs,prompts,adapters,scripts,PLAN.template.md,PROGRESS.template.md} .
+cp -r /tmp/keel/{AGENTS.md,prompts,adapters,scripts,PLAN.template.md,PROGRESS.template.md} .
+mkdir -p docs && cp /tmp/keel/docs/AGENT_SOP.md docs/     # the SOPs only, not the website
 chmod +x scripts/*.sh scripts/hooks/*.sh adapters/*.sh
 mkdir -p logs/agent && echo "logs/" >> .gitignore
 bash scripts/install_git_hook.sh
