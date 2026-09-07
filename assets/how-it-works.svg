@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 262" width="1100" height="262" role="img" aria-label="Flow: request, classify, plan draft, human go, approved, work with verify loop, done">
+  <style>
+    text{font-family:"IBM Plex Mono",Menlo,Consolas,monospace;font-size:12.5px}
+    .t{fill:#10202B}.m{fill:#7C8D99}.h{fill:#B23A2F}.g{fill:#2E7D5B}.tiny{font-size:11px}
+    .label{font-family:"Bricolage Grotesque","Helvetica Neue",Arial,sans-serif;font-weight:600;font-size:15px;fill:#10202B}
+    .box{fill:#EEF1F4;stroke:#C9D2D9;stroke-width:1.2}.box-w{fill:#CFE0E8;stroke:#2F6F8F;stroke-width:1.2}.box-h{fill:#F1D9D5;stroke:#B23A2F;stroke-width:1.2}
+    .ln{stroke:#3B4C58;stroke-width:1.4;fill:none}.ln-h{stroke:#B23A2F;stroke-width:1.6;fill:none}.ln-d{stroke:#7C8D99;stroke-width:1.2;fill:none;stroke-dasharray:4 4}
+  </style>
+  <rect width="1100" height="262" fill="#E3E8EC" rx="10"/>
+          <!-- lane labels -->
+          <text x="16" y="40" class="m tiny">HUMAN</text>
+          <text x="16" y="150" class="m tiny">AGENT</text>
+          <line x1="0" y1="95" x2="1100" y2="95" class="ln-d"/>
+          <!-- human lane -->
+          <rect x="70" y="18" width="160" height="46" rx="6" class="box"/><text x="150" y="46" text-anchor="middle" class="t">describe a problem</text>
+          <rect x="520" y="18" width="130" height="46" rx="6" class="box-h"/><text x="585" y="46" text-anchor="middle" class="label">"go"</text>
+          <text x="585" y="82" text-anchor="middle" class="m tiny">or corrections → back to DRAFT</text>
+          <!-- agent lane -->
+          <rect x="70" y="124" width="160" height="46" rx="6" class="box"/><text x="150" y="152" text-anchor="middle" class="t">classify: complex?</text>
+          <rect x="270" y="124" width="210" height="46" rx="6" class="box-w"/><text x="375" y="146" text-anchor="middle" class="t">PLAN.md</text><text x="375" y="162" text-anchor="middle" class="m tiny">DRAFT · graph OK · pre-mortem</text>
+          <rect x="520" y="124" width="150" height="46" rx="6" class="box-w"/><text x="595" y="146" text-anchor="middle" class="t">APPROVED</text><text x="595" y="162" text-anchor="middle" class="m tiny">PROGRESS.md created</text>
+          <rect x="710" y="124" width="140" height="46" rx="6" class="box"/><text x="780" y="152" text-anchor="middle" class="t">task in progress</text>
+          <rect x="890" y="124" width="100" height="46" rx="6" class="box"/><text x="940" y="152" text-anchor="middle" class="t">verify</text>
+          <rect x="1030" y="124" width="56" height="46" rx="6" class="box"/><text x="1058" y="152" text-anchor="middle" class="g">done</text>
+          <!-- arrows -->
+          <path d="M150 64 V124" class="ln" marker-end="url(#a)"/>
+          <path d="M230 147 H270" class="ln" marker-end="url(#a)"/>
+          <path d="M480 147 H520" class="ln" marker-end="url(#a)"/>
+          <path d="M585 124 V64" class="ln-h" marker-end="url(#ah)"/>
+          <path d="M670 147 H710" class="ln" marker-end="url(#a)"/>
+          <path d="M850 147 H890" class="ln" marker-end="url(#a)"/>
+          <path d="M990 147 H1030" class="ln" marker-end="url(#a)"/>
+          <!-- verify fail loop -->
+          <path d="M940 170 V205 H780 V170" class="ln-h" marker-end="url(#ah)"/>
+          <text x="860" y="222" text-anchor="middle" class="h tiny">FAIL → fix · 3 fails → stop, diagnose</text>
+          <!-- log -->
+          <path d="M1058 170 V236 H1100" class="ln-d"/>
+          <text x="1090" y="252" text-anchor="end" class="m tiny">+ PROGRESS.md entry</text>
+          <defs>
+            <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#3B4C58"/></marker>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#B23A2F"/></marker>
+          </defs>
+        </svg>

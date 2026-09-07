@@ -1,5 +1,5 @@
-<p align="left">
-  <img src="assets/logo.svg" alt="keel" width="240">
+<p align="center">
+  <img src="assets/hero.svg" alt="keel — the part of the boat you never see" width="100%">
 </p>
 
 **A plan-driven operating layer for coding agents — any agent, any model.**
@@ -37,6 +37,10 @@ If the project already has an `AGENTS.md`, append keel's to it instead of
 overwriting.
 
 ## How it works
+
+<p align="center">
+  <img src="assets/how-it-works.svg" alt="Flow: describe a problem → classify → PLAN.md (DRAFT) → human go → APPROVED → task → verify → done, with the fail loop and the PROGRESS.md entry" width="100%">
+</p>
 
 1. **You describe a problem**, not a command.
 2. **The agent writes `PLAN.md` and stops.** Objective, dated requirements, a

@@ -1,8 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" width="320" height="120" role="img" aria-label="keel">
   <title>keel</title>
-  <path d="M18 56 Q64 26 110 56" fill="none" stroke="#10202B" stroke-width="7" stroke-linecap="round"/>
-  <path d="M0 56 H128" stroke="#2F6F8F" stroke-width="1.5" stroke-dasharray="4 3"/>
-  <path d="M22 56 Q64 92 106 56 Z" fill="#10202B"/>
-  <rect x="59" y="72" width="10" height="30" rx="2" fill="#B23A2F"/><rect x="47" y="98" width="34" height="9" rx="4.5" fill="#B23A2F"/>
+  <g transform="translate(0,-4)"><path d="M20 44 Q64 34 108 44" fill="none" stroke="#10202B" stroke-width="7" stroke-linecap="round"/><path d="M25 47 C25 78 46 92 64 92 C82 92 103 78 103 47 Z" fill="#10202B"/><path d="M0 62 H128" stroke="#2F6F8F" stroke-width="1.6" stroke-dasharray="5 4"/><rect x="59" y="90" width="10" height="24" rx="2" fill="#B23A2F"/><rect x="45" y="110" width="38" height="9" rx="4.5" fill="#B23A2F"/></g>
   <text x="150" y="80" font-family="Bricolage Grotesque, Helvetica Neue, Arial, sans-serif" font-weight="800" font-size="64" letter-spacing="-3" fill="#10202B">keel</text>
 </svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" role="img" aria-label="keel — the part of the boat you never see">
+  <title>keel — the part of the boat you never see</title>
+  <rect width="1200" height="420" fill="#EEF1F4"/>
+  <text x="72" y="96" font-family="IBM Plex Mono, Menlo, monospace" font-size="14" letter-spacing="3" fill="#B23A2F">PLAN-DRIVEN OPERATING LAYER FOR CODING AGENTS</text>
+  <text x="68" y="190" font-family="Bricolage Grotesque, Helvetica Neue, Arial, sans-serif" font-weight="800" font-size="84" letter-spacing="-3.5" fill="#10202B">The part of the boat</text>
+  <text x="68" y="278" font-family="Bricolage Grotesque, Helvetica Neue, Arial, sans-serif" font-weight="800" font-size="84" letter-spacing="-3.5" fill="#10202B">you never see<tspan fill="#B23A2F">.</tspan></text>
+  <text x="72" y="330" font-family="IBM Plex Sans, Helvetica Neue, Arial, sans-serif" font-size="22" fill="#3B4C58">Plan first · get it approved · verify before closing</text>
+  <text x="72" y="360" font-family="IBM Plex Sans, Helvetica Neue, Arial, sans-serif" font-size="22" fill="#3B4C58">Keep an append-only record · never grade your own work</text>
+  <text x="72" y="394" font-family="IBM Plex Mono, Menlo, monospace" font-size="13" letter-spacing="1" fill="#7C8D99">Codex · Claude Code · Gemini CLI · Cursor · GitHub Copilot · OpenCode · Aider · Pi</text>
+  <path d="M900 200 H1200" stroke="#2F6F8F" stroke-width="2" stroke-dasharray="7 6"/>
+  <text x="906" y="192" font-family="IBM Plex Mono, Menlo, monospace" font-size="12" letter-spacing="1" fill="#2F6F8F">WL</text>
+  <g transform="translate(930,54) scale(2.0)"><path d="M20 44 Q64 34 108 44" fill="none" stroke="#10202B" stroke-width="7" stroke-linecap="round"/><path d="M25 47 C25 78 46 92 64 92 C82 92 103 78 103 47 Z" fill="#10202B"/><rect x="59" y="90" width="10" height="24" rx="2" fill="#B23A2F"/><rect x="45" y="110" width="38" height="9" rx="4.5" fill="#B23A2F"/></g>
+</svg>
