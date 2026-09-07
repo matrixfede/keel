@@ -122,20 +122,6 @@
   .legend{margin-top:12px;font-size:14px;color:var(--mute)}
   .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--water);vertical-align:-1px;margin-right:6px}
 
-  /* logo section */
-  .logo-grid{display:grid;grid-template-columns:2fr 1fr;gap:18px}
-  @media (max-width:820px){.logo-grid{grid-template-columns:1fr}}
-  .tile{border:1px solid var(--line);border-radius:10px;padding:26px;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;min-height:220px}
-  .tile.light{background:#EEF1F4;color:#10202B}
-  .tile.dark{background:#0E171E;color:#E6ECEF}
-  .tile.red{background:#B23A2F;color:#FFF3F0}
-  .tile svg{width:64%;height:auto}
-  .tile .cap{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
-  .rationale{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-top:26px}
-  @media (max-width:820px){.rationale{grid-template-columns:1fr}}
-  .rationale p{font-size:15.5px;color:var(--ink-2)}
-  .rationale b{color:var(--ink);font-weight:600}
-
   footer{padding:48px 0 64px;border-top:1px solid var(--line);color:var(--mute);font-size:14.5px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
   @media (prefers-reduced-motion:no-preference){
     .waterline path.wave{animation:drift 14s linear infinite}
@@ -152,7 +138,7 @@
       keel
     </a>
     <nav>
-      <a href="#how">How it works</a><a href="#gears">Under the gears</a><a href="#compare">Not an orchestrator</a><a href="#agents">Agents</a><a href="#safety">Safety net</a><a href="#logo">Identity</a>
+      <a href="#how">How it works</a><a href="#gears">Under the gears</a><a href="#compare">Not an orchestrator</a><a href="#agents">Agents</a><a href="#safety">Safety net</a>
       <a href="https://github.com/matrixfede/keel">GitHub ↗</a>
     </nav>
   </header>
@@ -424,33 +410,6 @@
     <p class="legend" style="margin-top:14px">Claude Code additionally gets the gate at <em>write</em> time through a <code>PreToolUse</code> hook. Deliberate bypass everywhere: <code>git commit --no-verify</code>.</p>
   </section>
 
-  <section class="sec" id="logo">
-    <div class="sec-head">
-      <div><p class="eyebrow">Identity</p><h2>A hull, a waterline, and the red fin underneath.</h2></div>
-      <p class="lede">The mark is a section through a sailing hull: the deck arc you see, the dashed waterline, and below it the fin keel painted in the oxide red of antifouling paint — the only colour in the system, and it lives where nobody looks. The wordmark is lowercase Bricolage Grotesque, set narrow like a chart label. Files: <code>assets/logo.svg</code>, <code>assets/icon.svg</code>.</p>
-    </div>
-    <div class="logo-grid">
-      <div class="tile light">
-        <svg viewBox="0 0 320 120" aria-label="keel logo">
-          <g transform="translate(0,-4)"><path d="M20 44 Q64 34 108 44" fill="none" stroke="#10202B" stroke-width="7" stroke-linecap="round"/><path d="M25 47 C25 78 46 92 64 92 C82 92 103 78 103 47 Z" fill="#10202B"/><path d="M0 62 H128" stroke="#2F6F8F" stroke-width="1.6" stroke-dasharray="5 4"/><rect x="59" y="90" width="10" height="24" rx="2" fill="#B23A2F"/><rect x="45" y="110" width="38" height="9" rx="4.5" fill="#B23A2F"/></g>
-          <text x="150" y="80" font-family="Bricolage Grotesque, Helvetica Neue, Arial, sans-serif" font-weight="800" font-size="64" letter-spacing="-3" fill="#10202B" style="font-variation-settings:'wdth' 85">keel</text>
-        </svg>
-        <span class="cap">primary</span>
-      </div>
-      <div class="tile red">
-        <svg viewBox="0 0 128 128" aria-label="keel app icon">
-          <rect x="0" y="0" width="128" height="128" rx="28" fill="#B23A2F"/>
-          <g transform="translate(0,2)"><path d="M20 44 Q64 34 108 44" fill="none" stroke="#FFF3F0" stroke-width="7" stroke-linecap="round"/><path d="M25 47 C25 78 46 92 64 92 C82 92 103 78 103 47 Z" fill="#FFF3F0"/><path d="M0 62 H128" stroke="#FFF3F0" stroke-width="1.6" stroke-dasharray="5 4"/><rect x="59" y="90" width="10" height="24" rx="2" fill="#10202B"/><rect x="45" y="110" width="38" height="9" rx="4.5" fill="#10202B"/></g>
-        </svg>
-        <span class="cap">icon · 1:1 · favicon &amp; social</span>
-      </div>
-    </div>
-    <div class="rationale">
-      <p><b>Why a section, not a boat.</b> A silhouette of a yacht says "sailing". A cross-section says "structure": the part that does the work is under the surface, which is exactly the claim the tool makes.</p>
-      <p><b>Why one red.</b> Antifouling paint is red because of copper oxide, and it only goes below the waterline. The accent follows the same rule on the page — it marks the gate, the stop, the verdict — and nothing else.</p>
-      <p><b>Why these faces.</b> Bricolage Grotesque at a narrow width reads like a chart label; IBM Plex Sans and Mono carry the body and the code the way an engineering drawing carries its notes. Nothing decorative; every letter has a job.</p>
-    </div>
-  </section>
 
   <footer>
     <span>keel · MIT license · © 2026 Federico Gabrielli</span>
