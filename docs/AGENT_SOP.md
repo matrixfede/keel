@@ -316,9 +316,8 @@ verification is done by `scripts/checker.sh <n> <artifact> [others...]`:
    path and **SHA-256 hash of the artifact**. The pre-commit hook requires
    this file for every `critical` `✅` task and recomputes the hash: if the
    artifact changed after the review, the KEEP no longer holds and the checker
-   must run again. Earlier versions looked for the word `KEEP` in Notes — which
-   the same agent that did the work would write. Now the worker can no longer
-   grade itself.
+   must run again. A `KEEP` written in Notes by the working agent counts for
+   nothing: the worker cannot grade itself.
 5. `CHECKER: DROP` → the task goes back to `🔄` in the main session, with the
    rationale in Notes and an entry in `PROGRESS.md`.
 
