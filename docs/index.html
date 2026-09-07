@@ -103,6 +103,18 @@
   .checks p{font-size:15px;color:var(--ink-2)}
   .checks code{font-size:13.5px;background:var(--paper-2);padding:1px 6px;border-radius:4px}
 
+  /* comparison */
+  .cmp{width:100%;border-collapse:collapse;font-size:14.5px;min-width:760px}
+  .cmp th,.cmp td{padding:14px 16px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+  .cmp thead th{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);font-weight:500;background:var(--paper)}
+  .cmp tbody th{font-family:var(--display);font-weight:600;font-size:15.5px;color:var(--ink);width:22%}
+  .cmp tbody th span{display:block;font-family:var(--mono);font-size:11.5px;color:var(--mute);font-weight:400;margin-top:3px}
+  .cmp td{color:var(--ink-2)}
+  .cmp tr.me th,.cmp tr.me td{background:var(--hull-2);color:var(--ink);border-bottom:0}
+  .cmp tr.me th{border-left:4px solid var(--hull)}
+  .cmp code{font-size:13px}
+  .cmp tbody tr:last-child td,.cmp tbody tr:last-child th{border-bottom:0}
+
   /* agents strip */
   .agents{display:flex;flex-wrap:wrap;gap:10px}
   .agents span{font-family:var(--mono);font-size:13px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink-2);background:var(--paper)}
@@ -140,7 +152,7 @@
       keel
     </a>
     <nav>
-      <a href="#how">How it works</a><a href="#gears">Three gears</a><a href="#agents">Agents</a><a href="#safety">Safety net</a><a href="#logo">Identity</a>
+      <a href="#how">How it works</a><a href="#gears">Under the gears</a><a href="#compare">Not an orchestrator</a><a href="#agents">Agents</a><a href="#safety">Safety net</a><a href="#logo">Identity</a>
       <a href="https://github.com/matrixfede/keel">GitHub ↗</a>
     </nav>
   </header>
@@ -235,18 +247,18 @@
 
   <section class="sec" id="gears" data-depth="1 m · the mechanism">
     <div class="sec-head">
-      <div><p class="eyebrow">Three gears</p><h2>Agent, loop, graph — each one builds on the last.</h2></div>
-      <p class="lede">An <b>agent</b> gets the end state instead of the steps. A <b>loop</b> makes the work reliable by iterating against a check that can fail. A <b>graph</b> runs agents and loops in parallel where the dependencies allow it. keel ships the plumbing for all three and stays honest about when each is worth it.</p>
+      <div><p class="eyebrow">What keel puts under each gear</p><h2>Agent, loop, graph are the engine. keel is what sits underneath.</h2></div>
+      <p class="lede">Every framework ships the three gears — an <b>agent</b> that gets the end state, a <b>loop</b> that iterates against a check, a <b>graph</b> that runs work in parallel. keel does not compete on them. It adds the parts none of them ship: <b>the gate</b>, <b>the append-only log</b>, <b>the arguer</b>, <b>the fake edge test</b>, <b>output contracts</b>, <b>the model-free reduction</b>, <b>the hash-sealed verdict</b>. Each one is a brake, not a throttle.</p>
     </div>
 
     <div class="two" style="margin-bottom:28px">
       <div class="card">
-        <span class="eyebrow">Agent · memory in two files</span>
+        <span class="eyebrow">Under the agent · the append-only log</span>
         <h3>PLAN.md is the state. PROGRESS.md is the history.</h3>
         <p>The plan stays short and says where we are. The log is append-only, one entry per checkpoint — DID / DECIDED / BLOCKED / NEXT, under 100 words — and says how we got here. On resume the agent reads both and restarts from the last NEXT. To hand the work to a person, point them at the log. The hook refuses commits that delete a line from it.</p>
       </div>
       <div class="card">
-        <span class="eyebrow">Agent · the arguer</span>
+        <span class="eyebrow">Under the agent · the arguer</span>
         <h3>Nobody attacked the plan. Now something does.</h3>
         <p>Ask an agent "is this plan good?" and it says yes. <code>premortem.sh</code> opens a fresh session that sees only PLAN.md and has it narrate how the plan failed twelve months out — aiming at the ASSUMED lines, the edges, the verifications that would pass even with a wrong result. The top three risks enter the plan as PRE-MORTEM lines with a countermeasure, and you approve them with the table.</p>
       </div>
@@ -255,7 +267,7 @@
     <figure style="margin-bottom:28px">
       <div class="dia">
         <svg viewBox="0 0 1000 260" role="img" aria-label="Rubric loop: draft, score, gaps, log, call; stop on success or ceiling">
-          <text x="16" y="28" class="label">Loop · the rubric that shows its work</text>
+          <text x="16" y="28" class="label">Under the loop · the rubric that shows its work</text>
           <text x="16" y="48" class="m tiny">for documents, reports, analyses — outputs a test cannot judge</text>
           <g transform="translate(16,70)">
             <rect x="0" y="0" width="120" height="44" rx="6" class="box"/><text x="60" y="27" text-anchor="middle" class="t">DRAFT</text>
@@ -288,7 +300,7 @@
     <figure style="margin-bottom:28px">
       <div class="dia">
         <svg viewBox="0 0 1000 300" role="img" aria-label="The diamond: fan out three tasks in parallel, model-free reduction, converge">
-          <text x="16" y="28" class="label">Graph · the diamond</text>
+          <text x="16" y="28" class="label">Under the graph · the fake edge test, output contracts, the model-free reduction</text>
           <text x="16" y="48" class="m tiny">"Depends on" is a graph, not an order. plan_graph.py prints the execution waves.</text>
           <!-- wave 1 -->
           <text x="150" y="82" text-anchor="middle" class="m tiny">WAVE 1 · [P1] parallel</text>
@@ -322,7 +334,7 @@
     <figure>
       <div class="dia">
         <svg viewBox="0 0 1000 250" role="img" aria-label="The checker: worker and checker never share context; artifact copied into an empty folder; verdict with hash">
-          <text x="16" y="28" class="label">Graph · the checker that cannot grade its own homework</text>
+          <text x="16" y="28" class="label">Under the graph · the hash-sealed verdict</text>
           <text x="16" y="48" class="m tiny">for tasks marked critical</text>
           <!-- worker side -->
           <rect x="16" y="70" width="300" height="150" rx="8" class="box"/>
@@ -354,6 +366,25 @@
       </div>
       <figcaption>The same reasoning that produced a mistake is the reasoning that would look for it. An earlier design let the worker write "KEEP" in the plan's Notes — a deterministic check on a datum forgeable by the party being checked. Now the verdict is a file the hook verifies, hash included.</figcaption>
     </figure>
+  </section>
+
+  <section class="sec" id="compare">
+    <div class="sec-head">
+      <div><p class="eyebrow">Positioning</p><h2>keel is not an orchestrator.</h2></div>
+      <p class="lede">Orchestrators make agents go: they execute the graph, retry, fan out, scale. keel makes them accountable: the graph lives in a plan a person approves, and the rules are enforced by git, not by the model's good will. Use both — keel sits above whatever runs the work.</p>
+    </div>
+    <div class="dia" style="padding:0;overflow-x:auto">
+      <table class="cmp">
+        <thead><tr><th></th><th>Where the graph lives</th><th>Who approves before code is written</th><th>What is enforced — and by what</th><th>Vendor</th></tr></thead>
+        <tbody>
+          <tr><th>Orchestration frameworks<br><span>LangGraph · CrewAI · AutoGen</span></th><td>Python code, written by a developer</td><td>Optional human-in-the-loop node, if you build one</td><td>Nothing beyond your own code</td><td>Any model, your stack</td></tr>
+          <tr><th>Agent-native subagents<br><span>Claude Code · Codex · Copilot</span></th><td>Implicit in the conversation</td><td>Per-tool permission prompts; PR review afterwards</td><td>Vendor hooks or sandbox, one agent only</td><td>One vendor</td></tr>
+          <tr><th>A bare <code>AGENTS.md</code></th><td>Nowhere</td><td>Whatever the text says</td><td>Nothing — instructions the model may skip</td><td>Any</td></tr>
+          <tr class="me"><th>keel</th><td><code>PLAN.md</code>, a table a person reads, validated by <code>plan_graph.py</code></td><td>Explicit <code>DRAFT → APPROVED</code> state before any write</td><td>Git pre-commit hook, 4 checks · hash-sealed checker verdict · write-time hook where the agent allows it</td><td>Any agent, any model</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="legend" style="margin-top:14px"><b>What keel does not do:</b> run your graph at scale, manage distributed state, retries or queues, replace CI, or remove the human. It is the keel, not the engine.</p>
   </section>
 
   <section class="sec" id="agents" data-depth="2 m · the hull">

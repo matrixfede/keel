@@ -313,7 +313,7 @@ verification is done by `scripts/checker.sh <n> <artifact> [others...]`:
    enforced by the CLI, with other agents the script extracts it tolerantly).
    If unreadable: `CHECKER: ERROR`, no verdict — never a guessed KEEP.
 4. It writes `logs/agent/checker_task<n>.txt` with verdict, rationale, date,
-   path and **SHA-256 hash of the artifact**. The pre-commit hook requires
+   path and **SHA-256 hash of the artifact** — the *hash-sealed verdict*. The pre-commit hook requires
    this file for every `critical` `✅` task and recomputes the hash: if the
    artifact changed after the review, the KEEP no longer holds and the checker
    must run again. A `KEEP` written in Notes by the working agent counts for

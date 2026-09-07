@@ -17,6 +17,11 @@ append-only record, and never grade its own work.**
 No framework, no server, no SDK. Markdown, bash (3.2+, a stock Mac is fine),
 python3 standard library, git.
 
+<p align="center">
+  <img src="assets/hook-demo.gif" alt="A commit closing a critical task is blocked until the checker's hash-sealed verdict exists; after the verdict it passes; after editing the file it is blocked again" width="100%">
+</p>
+<p align="center"><sub>The brake, not the engine: the pre-commit hook refuses to close a critical task without a hash-sealed verdict — and again the moment the reviewed file changes.</sub></p>
+
 ## Install
 
 ```bash
@@ -74,21 +79,28 @@ To skip the gate once, say so explicitly: "skip the plan".
 | `adapters/` | Bridge files and the agent compatibility matrix. |
 | `tests/run_tests.sh` | 61 end-to-end checks; no agent CLI or network needed. |
 
-## The three levels
+## What keel puts under each gear
 
-**Agent.** `PLAN.md` says where the work is; `PROGRESS.md` says how it got
+Every framework ships the three gears — an agent that gets the end state, a
+loop that iterates against a check, a graph that runs work in parallel. keel
+does not compete on them. It adds the parts none of them ship, and each one is
+a brake, not a throttle: **the gate**, **the append-only log**, **the arguer**,
+**the fake edge test**, **output contracts**, **the model-free reduction**,
+**the hash-sealed verdict**.
+
+**Under the agent.** `PLAN.md` says where the work is; `PROGRESS.md` says how it got
 there, one DID / DECIDED / BLOCKED / NEXT entry per checkpoint, never
 rewritten. Before approval, `premortem.sh` asks a fresh session not "is the plan
 good?" but "it failed — why?", and the top three answers enter the plan with a
 countermeasure each.
 
-**Loop.** Outputs a test can't judge (documents, analyses) are verified against
+**Under the loop.** Outputs a test can't judge (documents, analyses) are verified against
 a rubric of 3–5 measurable criteria approved with the plan. Each pass logs a
 row — weakest criterion, score, what changed, new score. A score that drops
 stops the loop; a criterion that stays weakest three times is reworded through
 the gate. Two stop conditions, always: success or ceiling.
 
-**Graph.** "Depends on" holds real dependencies only; `plan_graph.py` proves
+**Under the graph.** "Depends on" holds real dependencies only; `plan_graph.py` proves
 it and prints the execution waves. Tasks in a parallel group declare an output
 contract — file, shape, a runnable check — so the next node can consume the
 result with nobody in between. `fanout.sh` runs a group in parallel and
@@ -96,6 +108,23 @@ reduces without a model. Critical tasks pass through `checker.sh`: a new
 session in a folder holding only a copy of the artifact, three independent
 checks, at least two out of three, verdict computed by the script and sealed
 with the artifact's hash so it expires if the file changes.
+
+## keel is not an orchestrator
+
+Orchestrators make agents go: they execute the graph, retry, fan out, scale.
+keel makes them accountable: the graph lives in a plan a person approves, and
+the rules are enforced by git, not by the model's good will. Use both — keel
+sits above whatever runs the work.
+
+| | Where the graph lives | Who approves before code is written | What is enforced — and by what | Vendor |
+|---|---|---|---|---|
+| **Orchestration frameworks** (LangGraph, CrewAI, AutoGen) | Python code, written by a developer | Optional human-in-the-loop node, if you build one | Nothing beyond your own code | Any model, your stack |
+| **Agent-native subagents** (Claude Code, Codex, Copilot) | Implicit in the conversation | Per-tool permission prompts; PR review afterwards | Vendor hooks or sandbox, one agent only | One vendor |
+| **A bare `AGENTS.md`** | Nowhere | Whatever the text says | Nothing — instructions the model may skip | Any |
+| **keel** | `PLAN.md`, a table a person reads, validated by `plan_graph.py` | Explicit `DRAFT → APPROVED` state before any write | Git pre-commit hook (4 checks) · hash-sealed checker verdict · write-time hook where the agent allows it | Any agent, any model |
+
+What keel does **not** do: run your graph at scale, manage distributed state,
+retries or queues, replace CI, or remove the human. It is the keel, not the engine.
 
 ## Compatibility
 
