@@ -22,6 +22,8 @@ bash adapters/install_adapter.sh all         # all three
 | **Aider** | no | `adapters/aider/.aider.conf.yml` (`read:`) | `custom` backend (`aider --message`) |
 | **Pi coding agent** | yes (AGENTS.md in cwd) | nothing | `custom` backend |
 | **Windsurf / Cline / Roo / Amp / Jules** | mostly yes | if not: copy a `CLAUDE.md`-style file under the name the agent expects | `custom` backend or by hand |
+| **Desktop apps** — Codex app, Cursor, Windsurf, VS Code extensions | as their CLI/agent | nothing | as their CLI, or `--prompt` / `--record` by hand |
+| **Claude Desktop (Cowork)**, chat apps with a folder attached | no | first message: "Read `AGENTS.md` and `docs/AGENT_SOP.md`, then: …" | `--prompt` / `--record` by hand (the app's shell can run the scripts) |
 
 CLIs whose non-interactive invocation was verified (real flags, not inferred):
 codex-cli 0.153, claude-code 2.1, gemini-cli 0.58, opencode 1.18, copilot-cli

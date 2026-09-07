@@ -397,6 +397,17 @@
       <span>Claude Code</span><span>Gemini CLI</span><span>Aider</span>
     </div>
     <p class="legend"><i></i> reads <code>AGENTS.md</code> natively · the others get a one-line bridge file from <code>adapters/install_adapter.sh</code></p>
+    <div class="two" style="margin-top:36px;align-items:start">
+      <div class="card">
+        <span class="eyebrow">Desktop apps too, not only the terminal</span>
+        <h3>Files in a folder work wherever an agent works in that folder.</h3>
+        <p>The Codex app, Cursor, Windsurf, VS Code with Claude Code or Copilot, Claude Desktop (Cowork) with the project folder connected, a chat with the folder attached. Where the app reads <code>AGENTS.md</code> or <code>CLAUDE.md</code> the rules load on their own; where it doesn't, one first message does it: <em>"Read AGENTS.md and docs/AGENT_SOP.md, then: &lt;your problem&gt;"</em>. The plan, the log and the approval are the same files; the pre-commit hook fires whenever anyone — app or human — commits.</p>
+      </div>
+      <figure>
+        <img src="../assets/desktop-demo.gif" alt="Schematic of the flow in a desktop agent app: problem, PLAN.md as DRAFT, go, APPROVED, PROGRESS.md, task verified and closed" style="width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:10px">
+        <figcaption>Schematic, not a screenshot of any one product: the plan is a file in the folder, the approval is a word in the chat, the verification is a command whose last line says PASS.</figcaption>
+      </figure>
+    </div>
   </section>
 
   <section class="sec" id="safety" data-depth="3 m · the keel">

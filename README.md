@@ -60,6 +60,22 @@ overwriting.
 
 To skip the gate once, say so explicitly: "skip the plan".
 
+## Desktop apps too, not only the terminal
+
+keel is files in a folder, so it works wherever an agent works in that folder:
+the Codex app, Cursor, Windsurf, VS Code with Claude Code or Copilot, Claude
+Desktop (Cowork) with the project folder connected, or a plain chat with the
+folder attached. The rules load natively where the app reads `AGENTS.md` /
+`CLAUDE.md`; where it does not, one first message does it — "Read `AGENTS.md`
+and `docs/AGENT_SOP.md`, then: *<your problem>*". The plan, the log and the
+approval are the same files; the pre-commit hook fires whenever anyone — app or
+human — commits.
+
+<p align="center">
+  <img src="assets/desktop-demo.gif" alt="In a desktop agent app with the project folder connected: the user describes a problem, the agent writes PLAN.md as DRAFT and waits, the user replies go, the plan becomes APPROVED, PROGRESS.md appears, task 1 runs its verification and closes" width="100%">
+</p>
+<p align="center"><sub>Schematic of the flow in any desktop agent app: the plan is a file in the folder, the approval is a word in the chat, the verification is a command whose last line says PASS.</sub></p>
+
 ## What's in the box
 
 | | |
@@ -134,6 +150,8 @@ agent. What varies is isolated in two places: how an agent reads `AGENTS.md`
 
 | Agent | `AGENTS.md` | Fresh sessions |
 |---|---|---|
+| Codex app · Cursor · Windsurf · VS Code (Claude Code, Copilot) | native | as their CLIs, or `--prompt` / `--record` by hand |
+| Claude Desktop (Cowork), chat apps with a folder attached | first message: "Read `AGENTS.md`…" | `--prompt` / `--record` by hand |
 | OpenAI Codex | native | `codex exec`, OS sandbox, JSON schema |
 | Claude Code | `CLAUDE.md` bridge + write-time hook | `claude -p --restricted` |
 | Gemini CLI | `.gemini/settings.json` bridge | `gemini -p --approval-mode plan\|yolo` |
