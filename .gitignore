@@ -1,0 +1,9 @@
+# keel — repository of the pack itself.
+# (In a project that ADOPTS keel, add `logs/` to that project's .gitignore; PLAN.md and PROGRESS.md stay versioned.)
+logs/
+__pycache__/
+*.pyc
+.DS_Store
+node_modules/
+.venv/
+/tmp/

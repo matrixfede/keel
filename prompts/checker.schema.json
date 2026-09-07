@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fresh-context checker verdict (SOP-8)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["check_accurate", "check_current", "check_references", "verdict", "rationale"],
+  "properties": {
+    "check_accurate":   { "type": "object", "additionalProperties": false, "required": ["result", "note"],
+                          "properties": { "result": { "enum": ["PASS", "FAIL"] }, "note": { "type": "string" } } },
+    "check_current":    { "type": "object", "additionalProperties": false, "required": ["result", "note"],
+                          "properties": { "result": { "enum": ["PASS", "FAIL"] }, "note": { "type": "string" } } },
+    "check_references": { "type": "object", "additionalProperties": false, "required": ["result", "note"],
+                          "properties": { "result": { "enum": ["PASS", "FAIL"] }, "note": { "type": "string" } } },
+    "verdict":          { "enum": ["KEEP", "DROP"] },
+    "rationale":        { "type": "string" }
+  }
+}

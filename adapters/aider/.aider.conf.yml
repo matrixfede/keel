@@ -1,0 +1,6 @@
+# .aider.conf.yml — makes Aider read the plan-driven pack rules.
+# Aider does not read AGENTS.md on its own: files under `read:` enter the context read-only.
+read:
+  - AGENTS.md
+  - docs/AGENT_SOP.md
+# PLAN.md and PROGRESS.md are edited by the agent: add them to the chat with /add, not here.
