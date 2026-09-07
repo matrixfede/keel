@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>keel — plan-driven operating layer for coding agents</title>
+<meta name="description" content="A plan-driven operating layer for coding agents — any agent, any model. Planning gate, append-only progress log, rubric loop, fresh-context checker, fan-out with model-free reduction, four-check pre-commit hook.">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+<meta name="color-scheme" content="light dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --paper:#EEF1F4; --paper-2:#E3E8EC; --ink:#10202B; --ink-2:#3B4C58; --mute:#7C8D99;
+    --line:#C9D2D9; --water:#2F6F8F; --water-2:#CFE0E8; --hull:#B23A2F; --hull-2:#F1D9D5;
+    --ok:#2E7D5B; --code-bg:#10202B; --code-fg:#DCE6EC;
+    --display:"Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+    --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --paper:#0E171E; --paper-2:#152129; --ink:#E6ECEF; --ink-2:#B7C4CC; --mute:#7E8F9B;
+    --line:#2A3942; --water:#6FB3D2; --water-2:#183241; --hull:#E0604B; --hull-2:#3A1F1B;
+    --ok:#5FC08F; --code-bg:#08111A; --code-fg:#DCE6EC; }}
+  :root[data-theme="dark"]{
+    --paper:#0E171E; --paper-2:#152129; --ink:#E6ECEF; --ink-2:#B7C4CC; --mute:#7E8F9B;
+    --line:#2A3942; --water:#6FB3D2; --water-2:#183241; --hull:#E0604B; --hull-2:#3A1F1B;
+    --ok:#5FC08F; --code-bg:#08111A; --code-fg:#DCE6EC; }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--water);text-decoration-thickness:1px;text-underline-offset:3px}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--hull);outline-offset:3px}
+  code,pre,.mono{font-family:var(--mono)}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+  h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-0.01em}
+  h2{font-size:clamp(28px,3.4vw,40px);font-weight:700;line-height:1.08;font-variation-settings:"wdth" 92}
+  h3{font-size:20px;font-weight:600;line-height:1.2}
+  p{margin:0}
+  .lede{font-size:19px;color:var(--ink-2);max-width:62ch}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--hull);font-weight:500}
+  .measure{max-width:66ch}
+  .sec{padding:72px 0;border-top:1px solid var(--line)}
+  .sec-head{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.4fr);gap:28px 48px;align-items:start;margin-bottom:36px}
+  @media (max-width:820px){.sec-head{grid-template-columns:1fr}}
+
+  /* header */
+  header.top{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+  .brand{display:flex;align-items:center;gap:12px;font-family:var(--display);font-weight:700;font-size:22px;color:var(--ink);text-decoration:none}
+  .brand svg{width:34px;height:34px}
+  nav a{margin-left:22px;font-size:15px;color:var(--ink-2);text-decoration:none}
+  nav a:hover{color:var(--ink);text-decoration:underline}
+  @media (max-width:620px){nav{display:none}}
+
+  /* hero */
+  .hero{position:relative;padding:44px 0 0}
+  .hero-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.9fr);gap:40px;align-items:end}
+  @media (max-width:820px){.hero-grid{grid-template-columns:1fr}}
+  .hero h1{font-size:clamp(52px,9vw,124px);font-weight:800;line-height:.92;font-variation-settings:"wdth" 88, "opsz" 96;letter-spacing:-0.035em}
+  .hero h1 em{font-style:normal;color:var(--hull)}
+  .thesis{margin-top:22px;font-size:clamp(19px,2.2vw,24px);color:var(--ink-2);max-width:30ch;line-height:1.35;font-family:var(--display);font-weight:500;font-variation-settings:"wdth" 96}
+  .install{margin-top:30px;background:var(--code-bg);color:var(--code-fg);border-radius:8px;padding:16px 18px;font-size:14.5px;line-height:1.65;overflow-x:auto;white-space:pre}
+  .install b{color:#9FD3EA;font-weight:500}
+  .install s{text-decoration:none;color:#8FA3B0}
+  .waterline{position:relative;height:120px;margin-top:38px;overflow:hidden}
+  .waterline svg{position:absolute;inset:0;width:100%;height:100%}
+  .hero-mark{justify-self:end;width:100%;max-width:340px}
+  .hero-mark svg{width:100%;height:auto;display:block}
+
+  /* facts row */
+  .facts{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--paper-2)}
+  .facts>div{padding:18px 20px;border-left:1px solid var(--line)}
+  .facts>div:first-child{border-left:0}
+  .facts .k{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+  .facts .v{font-family:var(--display);font-weight:700;font-size:22px;margin-top:4px;font-variation-settings:"wdth" 92}
+  @media (max-width:720px){.facts{grid-template-columns:1fr 1fr}.facts>div:nth-child(3){border-left:0}.facts>div{border-top:1px solid var(--line)}.facts>div:nth-child(-n+2){border-top:0}}
+
+  /* diagrams */
+  figure{margin:0}
+  .dia{border:1px solid var(--line);border-radius:10px;background:var(--paper-2);padding:18px;overflow-x:auto}
+  .dia svg{display:block;width:100%;height:auto;min-width:560px;font-family:var(--mono);font-size:12.5px}
+  .dia .t{fill:var(--ink)} .dia .m{fill:var(--mute)} .dia .w{fill:var(--water)} .dia .h{fill:var(--hull)} .dia .g{fill:var(--ok)}
+  .dia .box{fill:var(--paper);stroke:var(--line);stroke-width:1.2}
+  .dia .box-w{fill:var(--water-2);stroke:var(--water);stroke-width:1.2}
+  .dia .box-h{fill:var(--hull-2);stroke:var(--hull);stroke-width:1.2}
+  .dia .box-k{fill:var(--ink);stroke:var(--ink)}
+  .dia .ln{stroke:var(--ink-2);stroke-width:1.4;fill:none}
+  .dia .ln-w{stroke:var(--water);stroke-width:1.6;fill:none}
+  .dia .ln-h{stroke:var(--hull);stroke-width:1.6;fill:none}
+  .dia .ln-d{stroke:var(--mute);stroke-width:1.2;fill:none;stroke-dasharray:4 4}
+  .dia .label{font-family:var(--display);font-weight:600;font-size:15px;fill:var(--ink)}
+  .dia .tiny{font-size:11px}
+  figcaption{margin-top:12px;font-size:14.5px;color:var(--mute);max-width:70ch}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  @media (max-width:820px){.two{grid-template-columns:1fr}}
+  .card{border:1px solid var(--line);border-radius:10px;padding:22px 24px;background:var(--paper)}
+  .card h3{margin-bottom:8px}
+  .card p{color:var(--ink-2);font-size:15.5px}
+  .card .eyebrow{display:block;margin-bottom:8px}
+
+  /* checks list */
+  .checks{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  @media (max-width:720px){.checks{grid-template-columns:1fr}}
+  .checks>div{background:var(--paper);padding:20px 22px}
+  .checks .n{font-family:var(--mono);color:var(--hull);font-size:12px;letter-spacing:.1em}
+  .checks h3{margin:6px 0 6px}
+  .checks p{font-size:15px;color:var(--ink-2)}
+  .checks code{font-size:13.5px;background:var(--paper-2);padding:1px 6px;border-radius:4px}
+
+  /* agents strip */
+  .agents{display:flex;flex-wrap:wrap;gap:10px}
+  .agents span{font-family:var(--mono);font-size:13px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;color:var(--ink-2);background:var(--paper)}
+  .agents span.native{border-color:var(--water);color:var(--water)}
+  .legend{margin-top:12px;font-size:14px;color:var(--mute)}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:50%;border:1.5px solid var(--water);vertical-align:-1px;margin-right:6px}
+
+  /* logo section */
+  .logo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+  @media (max-width:820px){.logo-grid{grid-template-columns:1fr}}
+  .tile{border:1px solid var(--line);border-radius:10px;padding:26px;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;min-height:220px}
+  .tile.light{background:#EEF1F4;color:#10202B}
+  .tile.dark{background:#0E171E;color:#E6ECEF}
+  .tile.red{background:#B23A2F;color:#FFF3F0}
+  .tile svg{width:64%;height:auto}
+  .tile .cap{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.75}
+  .rationale{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-top:26px}
+  @media (max-width:820px){.rationale{grid-template-columns:1fr}}
+  .rationale p{font-size:15.5px;color:var(--ink-2)}
+  .rationale b{color:var(--ink);font-weight:600}
+
+  footer{padding:48px 0 64px;border-top:1px solid var(--line);color:var(--mute);font-size:14.5px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  @media (prefers-reduced-motion:no-preference){
+    .waterline path.wave{animation:drift 14s linear infinite}
+    @keyframes drift{to{transform:translateX(-160px)}}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#top" aria-label="keel">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M6 24 Q32 8 58 24" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M8 24 Q32 46 56 24 Z" fill="currentColor"/><rect x="29" y="30" width="6" height="22" rx="1.5" fill="var(--hull)"/><rect x="22" y="50" width="20" height="6" rx="3" fill="var(--hull)"/></svg>
+      keel
+    </a>
+    <nav>
+      <a href="#how">How it works</a><a href="#gears">Three gears</a><a href="#safety">Safety net</a><a href="#agents">Agents</a><a href="#logo">Identity</a>
+      <a href="https://github.com/matrixfede/keel">GitHub ↗</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="top">
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">Plan-driven operating layer for coding agents</p>
+        <h1>The part of the boat you never see<em>.</em></h1>
+        <p class="thesis">A keel keeps the hull on course when the wind pushes sideways. keel does that for Codex, Claude Code, Gemini CLI, Cursor, Copilot, OpenCode, Aider and Pi.</p>
+        <div class="install"><s>$</s> git clone https://github.com/matrixfede/keel.git /tmp/keel
+<s>$</s> cp -r /tmp/keel/{AGENTS.md,docs,prompts,adapters,scripts,PLAN.template.md,PROGRESS.template.md} .
+<s>$</s> bash scripts/install_git_hook.sh        <b># 4 deterministic checks, any agent</b>
+<s>$</s> bash adapters/install_adapter.sh claude  <b># only if the agent doesn't read AGENTS.md</b></div>
+      </div>
+      <div class="hero-mark" aria-hidden="true">
+        <svg viewBox="0 0 340 300">
+          <defs>
+            <clipPath id="below"><rect x="0" y="150" width="340" height="150"/></clipPath>
+          </defs>
+          <!-- what the user sees: the deck and the chat -->
+          <path d="M40 150 Q170 60 300 150" fill="none" stroke="var(--ink)" stroke-width="10" stroke-linecap="round"/>
+          <text x="170" y="112" text-anchor="middle" font-family="var(--mono)" font-size="12" fill="var(--mute)" letter-spacing="2">ABOVE: THE CHAT</text>
+          <!-- waterline -->
+          <path d="M0 150 H340" stroke="var(--water)" stroke-width="2" stroke-dasharray="6 5"/>
+          <!-- hull -->
+          <path d="M44 150 Q170 250 296 150 Z" fill="var(--ink)"/>
+          <!-- keel fin + bulb, hull red like antifouling paint -->
+          <rect x="158" y="196" width="24" height="70" rx="4" fill="var(--hull)"/>
+          <rect x="128" y="258" width="84" height="20" rx="10" fill="var(--hull)"/>
+          <text x="170" y="296" text-anchor="middle" font-family="var(--mono)" font-size="12" fill="var(--mute)" letter-spacing="2">BELOW: PLAN · VERIFY · LOG</text>
+        </svg>
+      </div>
+    </div>
+    <div class="waterline" aria-hidden="true">
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path class="wave" d="M-160 60 Q-120 40 -80 60 T0 60 T80 60 T160 60 T240 60 T320 60 T400 60 T480 60 T560 60 T640 60 T720 60 T800 60 T880 60 T960 60 T1040 60 T1120 60 T1200 60 T1280 60 T1360 60" fill="none" stroke="var(--water)" stroke-width="1.5" opacity=".8"/>
+        <path class="wave" d="M-160 84 Q-120 68 -80 84 T0 84 T80 84 T160 84 T240 84 T320 84 T400 84 T480 84 T560 84 T640 84 T720 84 T800 84 T880 84 T960 84 T1040 84 T1120 84 T1200 84 T1280 84 T1360 84" fill="none" stroke="var(--water)" stroke-width="1" opacity=".45"/>
+      </svg>
+    </div>
+    <div class="facts">
+      <div><div class="k">Dependencies</div><div class="v">bash 3.2 · python3 · git</div></div>
+      <div><div class="k">Agents</div><div class="v">8 supported</div></div>
+      <div><div class="k">Enforced at commit</div><div class="v">4 checks</div></div>
+      <div><div class="k">Tests</div><div class="v">61 e2e · Ubuntu + macOS</div></div>
+    </div>
+  </section>
+
+  <section class="sec" id="how">
+    <div class="sec-head">
+      <div><p class="eyebrow">How a session goes</p><h2>Plan first. Get the plan approved. Then, and only then, code.</h2></div>
+      <p class="lede">You describe a problem, not a command. The agent classifies it; if it's complex it writes <code>PLAN.md</code> — objective, dated requirements, a task table with a verification per row — and stops. Nothing is written until you reply <b>go</b>. From there every task closes only on a verification that actually ran.</p>
+    </div>
+    <figure>
+      <div class="dia">
+        <svg viewBox="0 0 1000 250" role="img" aria-label="Flow: request, classify, plan draft, human go, approved, work with verify loop, done">
+          <!-- lane labels -->
+          <text x="16" y="40" class="m tiny">HUMAN</text>
+          <text x="16" y="150" class="m tiny">AGENT</text>
+          <line x1="0" y1="95" x2="1000" y2="95" class="ln-d"/>
+          <!-- human lane -->
+          <rect x="70" y="18" width="150" height="46" rx="6" class="box"/><text x="145" y="46" text-anchor="middle" class="t">describe a problem</text>
+          <rect x="470" y="18" width="120" height="46" rx="6" class="box-h"/><text x="530" y="46" text-anchor="middle" class="label">"go"</text>
+          <text x="530" y="82" text-anchor="middle" class="m tiny">or corrections → back to DRAFT</text>
+          <!-- agent lane -->
+          <rect x="70" y="124" width="150" height="46" rx="6" class="box"/><text x="145" y="152" text-anchor="middle" class="t">classify: complex?</text>
+          <rect x="260" y="124" width="170" height="46" rx="6" class="box-w"/><text x="345" y="146" text-anchor="middle" class="t">PLAN.md</text><text x="345" y="162" text-anchor="middle" class="m tiny">status: DRAFT · graph OK · pre-mortem</text>
+          <rect x="470" y="124" width="120" height="46" rx="6" class="box-w"/><text x="530" y="146" text-anchor="middle" class="t">APPROVED</text><text x="530" y="162" text-anchor="middle" class="m tiny">PROGRESS.md created</text>
+          <rect x="630" y="124" width="130" height="46" rx="6" class="box"/><text x="695" y="152" text-anchor="middle" class="t">task 🔄</text>
+          <rect x="800" y="124" width="90" height="46" rx="6" class="box"/><text x="845" y="152" text-anchor="middle" class="t">verify</text>
+          <rect x="930" y="124" width="56" height="46" rx="6" class="box"/><text x="958" y="152" text-anchor="middle" class="g">✅</text>
+          <!-- arrows -->
+          <path d="M145 64 V124" class="ln" marker-end="url(#a)"/>
+          <path d="M220 147 H260" class="ln" marker-end="url(#a)"/>
+          <path d="M430 147 H470" class="ln" marker-end="url(#a)"/>
+          <path d="M530 124 V64" class="ln-h" marker-end="url(#ah)"/>
+          <path d="M590 147 H630" class="ln" marker-end="url(#a)"/>
+          <path d="M760 147 H800" class="ln" marker-end="url(#a)"/>
+          <path d="M890 147 H930" class="ln" marker-end="url(#a)"/>
+          <!-- verify fail loop -->
+          <path d="M845 170 V205 H695 V170" class="ln-h" marker-end="url(#ah)"/>
+          <text x="770" y="222" text-anchor="middle" class="h tiny">FAIL → fix · 3 fails → ⛔ stop, diagnose</text>
+          <!-- log -->
+          <path d="M958 170 V205 H1000" class="ln-d"/>
+          <text x="965" y="222" text-anchor="end" class="m tiny">+ PROGRESS.md entry</text>
+          <defs>
+            <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--ink-2)"/></marker>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--hull)"/></marker>
+          </defs>
+        </svg>
+      </div>
+      <figcaption>The gate is the pause between the plan and the work. Thirty seconds of human reading cost less than a wrong refactor discovered at the fourth task. Verification is a command whose last line says PASS or FAIL — "it should work" is not a result.</figcaption>
+    </figure>
+  </section>
+
+  <section class="sec" id="gears">
+    <div class="sec-head">
+      <div><p class="eyebrow">Three gears</p><h2>Agent, loop, graph — each one builds on the last.</h2></div>
+      <p class="lede">An <b>agent</b> gets the end state instead of the steps. A <b>loop</b> makes the work reliable by iterating against a check that can fail. A <b>graph</b> runs agents and loops in parallel where the dependencies allow it. keel ships the plumbing for all three and stays honest about when each is worth it.</p>
+    </div>
+
+    <div class="two" style="margin-bottom:28px">
+      <div class="card">
+        <span class="eyebrow">Agent · memory in two files</span>
+        <h3>PLAN.md is the state. PROGRESS.md is the history.</h3>
+        <p>The plan stays short and says where we are. The log is append-only, one entry per checkpoint — DID / DECIDED / BLOCKED / NEXT, under 100 words — and says how we got here. On resume the agent reads both and restarts from the last NEXT. To hand the work to a person, point them at the log. The hook refuses commits that delete a line from it.</p>
+      </div>
+      <div class="card">
+        <span class="eyebrow">Agent · the arguer</span>
+        <h3>Nobody attacked the plan. Now something does.</h3>
+        <p>Ask an agent "is this plan good?" and it says yes. <code>premortem.sh</code> opens a fresh session that sees only PLAN.md and has it narrate how the plan failed twelve months out — aiming at the ASSUMED lines, the edges, the verifications that would pass even with a wrong result. The top three risks enter the plan as PRE-MORTEM lines with a countermeasure, and you approve them with the table.</p>
+      </div>
+    </div>
+
+    <figure style="margin-bottom:28px">
+      <div class="dia">
+        <svg viewBox="0 0 1000 260" role="img" aria-label="Rubric loop: draft, score, gaps, log, call; stop on success or ceiling">
+          <text x="16" y="28" class="label">Loop · the rubric that shows its work</text>
+          <text x="16" y="48" class="m tiny">for documents, reports, analyses — outputs a test cannot judge</text>
+          <g transform="translate(16,70)">
+            <rect x="0" y="0" width="120" height="44" rx="6" class="box"/><text x="60" y="27" text-anchor="middle" class="t">DRAFT</text>
+            <rect x="160" y="0" width="120" height="44" rx="6" class="box"/><text x="220" y="27" text-anchor="middle" class="t">SCORE 1–10</text>
+            <rect x="320" y="0" width="120" height="44" rx="6" class="box"/><text x="380" y="27" text-anchor="middle" class="t">GAPS</text>
+            <rect x="480" y="0" width="120" height="44" rx="6" class="box-w"/><text x="540" y="27" text-anchor="middle" class="t">LOG row</text>
+            <rect x="640" y="0" width="120" height="44" rx="6" class="box"/><text x="700" y="27" text-anchor="middle" class="t">CALL</text>
+            <path d="M120 22 H160" class="ln" marker-end="url(#a)"/><path d="M280 22 H320" class="ln" marker-end="url(#a)"/><path d="M440 22 H480" class="ln" marker-end="url(#a)"/><path d="M600 22 H640" class="ln" marker-end="url(#a)"/>
+            <!-- iterate back -->
+            <path d="M700 44 V84 H60 V44" class="ln" marker-end="url(#a)"/>
+            <text x="380" y="100" text-anchor="middle" class="m tiny">any criterion &lt; 8 → next pass, weakest criterion first · max 5 passes</text>
+            <!-- exits -->
+            <path d="M760 22 H820" class="ln-w" marker-end="url(#a)"/>
+            <rect x="822" y="0" width="150" height="44" rx="6" class="box-w"/><text x="897" y="20" text-anchor="middle" class="t">all ≥ 8 → ✅</text><text x="897" y="35" text-anchor="middle" class="m tiny">scores + keep rate in Notes</text>
+            <path d="M760 30 Q790 30 800 70 L820 70" class="ln-h" fill="none" marker-end="url(#ah)"/>
+            <rect x="822" y="52" width="150" height="44" rx="6" class="box-h"/><text x="897" y="72" text-anchor="middle" class="t">ceiling → ⛔</text><text x="897" y="87" text-anchor="middle" class="m tiny">last scores + why it won't converge</text>
+          </g>
+          <!-- pass table -->
+          <g transform="translate(16,190)" class="tiny">
+            <text x="0" y="0" class="m">logs/agent/rubric_task4.md</text>
+            <text x="0" y="20" class="t">| pass | weakest | score | what changed            | new score        |</text>
+            <text x="0" y="38" class="t">| 2    | c3      | 5     | added dates to 7 sources | c1=6 c2=7 c3=8 |</text>
+            <text x="0" y="56" class="h">score goes down → stop, revert · same criterion weakest 3× → the criterion is vague: reword it through the gate</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption>Two stop conditions, always: success or ceiling — never one. And four conditions before declaring a rubric at all: it will recur, it can grade itself, it closes without human input, the finish line is a fact. Miss one and the right verification is "user review".</figcaption>
+    </figure>
+
+    <figure style="margin-bottom:28px">
+      <div class="dia">
+        <svg viewBox="0 0 1000 300" role="img" aria-label="The diamond: fan out three tasks in parallel, model-free reduction, converge">
+          <text x="16" y="28" class="label">Graph · the diamond</text>
+          <text x="16" y="48" class="m tiny">"Depends on" is a graph, not an order. plan_graph.py prints the execution waves.</text>
+          <!-- wave 1 -->
+          <text x="150" y="82" text-anchor="middle" class="m tiny">WAVE 1 · [P1] parallel</text>
+          <rect x="60" y="96" width="180" height="42" rx="6" class="box-w"/><text x="150" y="122" text-anchor="middle" class="t">task 1 → out/a.md</text>
+          <rect x="60" y="150" width="180" height="42" rx="6" class="box-w"/><text x="150" y="176" text-anchor="middle" class="t">task 2 → out/b.tsv</text>
+          <rect x="60" y="204" width="180" height="42" rx="6" class="box-w"/><text x="150" y="230" text-anchor="middle" class="t">task 3 → out/c.json</text>
+          <text x="150" y="272" text-anchor="middle" class="m tiny">one session each · sees only its task + contract</text>
+          <!-- reduce -->
+          <text x="470" y="82" text-anchor="middle" class="m tiny">REDUCE · no model, zero tokens</text>
+          <rect x="360" y="96" width="220" height="150" rx="6" class="box-k"/>
+          <text x="470" y="128" text-anchor="middle" fill="var(--paper)" style="font-family:var(--display);font-weight:600;font-size:15px">fanout.sh --reduce</text>
+          <text x="470" y="156" text-anchor="middle" fill="var(--paper)" class="tiny">OUT exists &amp; non-empty</text>
+          <text x="470" y="176" text-anchor="middle" fill="var(--paper)" class="tiny">check: `head -1 out/b.tsv | grep -q ^id`</text>
+          <text x="470" y="196" text-anchor="middle" fill="var(--paper)" class="tiny">worker ended with TASK n: DONE</text>
+          <text x="470" y="216" text-anchor="middle" fill="var(--paper)" class="tiny">PLAN.md &amp; PROGRESS.md untouched</text>
+          <text x="470" y="272" text-anchor="middle" class="m tiny">FANOUT: PASS | FAIL</text>
+          <!-- wave 2 -->
+          <text x="820" y="82" text-anchor="middle" class="m tiny">WAVE 2 · convergence</text>
+          <rect x="700" y="140" width="240" height="60" rx="6" class="box"/><text x="820" y="165" text-anchor="middle" class="t">task 4: synthesize</text><text x="820" y="184" text-anchor="middle" class="m tiny">depends on 1, 2, 3 · critical</text>
+          <!-- edges -->
+          <path d="M240 117 Q300 117 360 150" class="ln-w" marker-end="url(#a)"/>
+          <path d="M240 171 H360" class="ln-w" marker-end="url(#a)"/>
+          <path d="M240 225 Q300 225 360 192" class="ln-w" marker-end="url(#a)"/>
+          <path d="M580 171 H700" class="ln" marker-end="url(#a)"/>
+          <text x="640" y="160" text-anchor="middle" class="g tiny">only on PASS</text>
+        </svg>
+      </div>
+      <figcaption>Every task in a parallel group declares a contract in PLAN.md — <code>OUT</code>, <code>shape</code>, a runnable <code>check</code>. A node with a declared output shape is readable by the next node with nobody in between; an output outside its shape is rejected, not adapted to. Sequential remains the default: parallelism is chosen, not suffered.</figcaption>
+    </figure>
+
+    <figure>
+      <div class="dia">
+        <svg viewBox="0 0 1000 250" role="img" aria-label="The checker: worker and checker never share context; artifact copied into an empty folder; verdict with hash">
+          <text x="16" y="28" class="label">Graph · the checker that cannot grade its own homework</text>
+          <text x="16" y="48" class="m tiny">for tasks marked critical</text>
+          <!-- worker side -->
+          <rect x="16" y="70" width="300" height="150" rx="8" class="box"/>
+          <text x="166" y="96" text-anchor="middle" class="m tiny">WORKING SESSION · full context</text>
+          <text x="166" y="124" text-anchor="middle" class="t">conversation · repo · PLAN.md</text>
+          <rect x="106" y="146" width="120" height="40" rx="6" class="box-w"/><text x="166" y="171" text-anchor="middle" class="t">artifact</text>
+          <text x="166" y="208" text-anchor="middle" class="m tiny">"is it good?" → yes, always</text>
+          <!-- wall -->
+          <line x1="360" y1="70" x2="360" y2="220" class="ln-h"/>
+          <text x="360" y="60" text-anchor="middle" class="h tiny">NO SHARED CONTEXT</text>
+          <path d="M226 166 Q300 166 300 120 Q300 100 460 100 Q520 100 520 146" class="ln-h" marker-end="url(#ah)"/>
+          <text x="410" y="90" text-anchor="middle" class="h tiny">cp artifact → empty tmp dir</text>
+          <!-- checker side -->
+          <rect x="400" y="70" width="300" height="150" rx="8" class="box-h"/>
+          <text x="550" y="96" text-anchor="middle" class="m tiny">FRESH SESSION · read-only</text>
+          <rect x="490" y="146" width="120" height="40" rx="6" class="box"/><text x="550" y="171" text-anchor="middle" class="t">artifact only</text>
+          <text x="550" y="124" text-anchor="middle" class="t">prompts/checker.md: find why it fails</text>
+          <text x="550" y="208" text-anchor="middle" class="m tiny">accurate? current? references hold?</text>
+          <!-- verdict -->
+          <path d="M700 145 H740" class="ln" marker-end="url(#a)"/>
+          <rect x="742" y="70" width="242" height="150" rx="8" class="box"/>
+          <text x="863" y="96" text-anchor="middle" class="m tiny">logs/agent/checker_task3.txt</text>
+          <text x="756" y="124" class="t tiny">VERDICT: KEEP   ← script decides:</text>
+          <text x="756" y="142" class="m tiny">model KEEP AND ≥ 2 of 3 PASS</text>
+          <text x="756" y="168" class="t tiny">SHA256: 72d8264b…d4af</text>
+          <text x="756" y="186" class="m tiny">artifact edited later → KEEP expires</text>
+          <text x="756" y="208" class="h tiny">pre-commit hook recomputes the hash</text>
+        </svg>
+      </div>
+      <figcaption>The same reasoning that produced a mistake is the reasoning that would look for it. An earlier design let the worker write "KEEP" in the plan's Notes — a deterministic check on a datum forgeable by the party being checked. Now the verdict is a file the hook verifies, hash included.</figcaption>
+    </figure>
+  </section>
+
+  <section class="sec" id="safety">
+    <div class="sec-head">
+      <div><p class="eyebrow">Safety net</p><h2>Rules the model can skip. A hook it can't.</h2></div>
+      <p class="lede">Everything in AGENTS.md is an instruction, and an instruction can be ignored on a bad day. The pre-commit hook is git: identical for every agent, and it fires exactly where unapproved work would become permanent.</p>
+    </div>
+    <div class="checks">
+      <div><div class="n">CHECK 1</div><h3>No code while the plan is DRAFT</h3><p>Any staged file other than <code>PLAN.md</code> / <code>PROGRESS.md</code> with <code>Plan status: DRAFT</code> → commit refused.</p></div>
+      <div><div class="n">CHECK 2</div><h3>No critical ✅ without a valid verdict</h3><p>Needs <code>checker_task&lt;n&gt;.txt</code> with <code>VERDICT: KEEP</code> and a SHA-256 that still matches the artifact.</p></div>
+      <div><div class="n">CHECK 3</div><h3>No broken graph</h3><p><code>plan_graph.py</code> must say <code>GRAPH: OK</code>: no cycles, no fake independence, no task without verification or contract.</p></div>
+      <div><div class="n">CHECK 4</div><h3>No line removed from PROGRESS.md</h3><p>The log is append-only. A diff that deletes an entry is refused; you add an entry saying what changed and why.</p></div>
+    </div>
+    <p class="legend" style="margin-top:14px">Claude Code additionally gets the gate at <em>write</em> time through a <code>PreToolUse</code> hook. Deliberate bypass everywhere: <code>git commit --no-verify</code>.</p>
+  </section>
+
+  <section class="sec" id="agents">
+    <div class="sec-head">
+      <div><p class="eyebrow">Compatibility</p><h2>Any agent. Any model. One rules file.</h2></div>
+      <p class="lede">Everything binding is markdown, standard python3 and git. What varies per agent is isolated in two places: how it reads <code>AGENTS.md</code> (<code>adapters/</code>) and how a fresh session is opened (<code>scripts/lib_agent.sh</code>, one backend per CLI plus <code>custom</code>). What an agent can't provide is documented, not faked.</p>
+    </div>
+    <div class="agents">
+      <span class="native">Codex</span><span class="native">Cursor</span><span class="native">GitHub Copilot</span><span class="native">OpenCode</span><span class="native">Pi</span>
+      <span>Claude Code</span><span>Gemini CLI</span><span>Aider</span>
+    </div>
+    <p class="legend"><i></i> reads <code>AGENTS.md</code> natively · the others get a one-line bridge file from <code>adapters/install_adapter.sh</code></p>
+  </section>
+
+  <section class="sec" id="logo">
+    <div class="sec-head">
+      <div><p class="eyebrow">Identity proposal</p><h2>A hull, a waterline, and the red fin underneath.</h2></div>
+      <p class="lede">The mark is a section through a sailing hull: the deck arc you see, the dashed waterline, and below it the fin keel painted in the oxide red of antifouling paint — the only colour in the system, and it lives where nobody looks. The wordmark is lowercase Bricolage Grotesque, set narrow like a chart label.</p>
+    </div>
+    <div class="logo-grid">
+      <div class="tile light">
+        <svg viewBox="0 0 320 120" aria-label="keel logo, light">
+          <path d="M18 56 Q64 26 110 56" fill="none" stroke="#10202B" stroke-width="7" stroke-linecap="round"/>
+          <path d="M0 56 H128" stroke="#2F6F8F" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <path d="M22 56 Q64 92 106 56 Z" fill="#10202B"/>
+          <rect x="59" y="72" width="10" height="30" rx="2" fill="#B23A2F"/><rect x="47" y="98" width="34" height="9" rx="4.5" fill="#B23A2F"/>
+          <text x="150" y="80" font-family="Bricolage Grotesque, Helvetica Neue, Arial, sans-serif" font-weight="800" font-size="64" letter-spacing="-3" fill="#10202B" style="font-variation-settings:'wdth' 85">keel</text>
+        </svg>
+        <span class="cap">primary · light</span>
+      </div>
+      <div class="tile dark">
+        <svg viewBox="0 0 320 120" aria-label="keel logo, dark">
+          <path d="M18 56 Q64 26 110 56" fill="none" stroke="#E6ECEF" stroke-width="7" stroke-linecap="round"/>
+          <path d="M0 56 H128" stroke="#6FB3D2" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <path d="M22 56 Q64 92 106 56 Z" fill="#E6ECEF"/>
+          <rect x="59" y="72" width="10" height="30" rx="2" fill="#E0604B"/><rect x="47" y="98" width="34" height="9" rx="4.5" fill="#E0604B"/>
+          <text x="150" y="80" font-family="Bricolage Grotesque, Helvetica Neue, Arial, sans-serif" font-weight="800" font-size="64" letter-spacing="-3" fill="#E6ECEF" style="font-variation-settings:'wdth' 85">keel</text>
+        </svg>
+        <span class="cap">primary · dark</span>
+      </div>
+      <div class="tile red">
+        <svg viewBox="0 0 120 120" aria-label="keel app icon">
+          <rect x="0" y="0" width="120" height="120" rx="26" fill="#B23A2F"/>
+          <path d="M22 54 Q60 26 98 54" fill="none" stroke="#FFF3F0" stroke-width="8" stroke-linecap="round"/>
+          <path d="M26 54 Q60 92 94 54 Z" fill="#FFF3F0"/>
+          <rect x="55" y="70" width="10" height="26" rx="2" fill="#10202B"/><rect x="42" y="92" width="36" height="9" rx="4.5" fill="#10202B"/>
+        </svg>
+        <span class="cap">icon · 1:1 · favicon &amp; social</span>
+      </div>
+    </div>
+    <div class="rationale">
+      <p><b>Why a section, not a boat.</b> A silhouette of a yacht says "sailing". A cross-section says "structure": the part that does the work is under the surface, which is exactly the claim the tool makes.</p>
+      <p><b>Why one red.</b> Antifouling paint is red because of copper oxide, and it only goes below the waterline. The accent follows the same rule on the page — it marks the gate, the stop, the verdict — and nothing else.</p>
+      <p><b>Why these faces.</b> Bricolage Grotesque at a narrow width reads like a chart label; IBM Plex Sans and Mono carry the body and the code the way an engineering drawing carries its notes. Nothing decorative; every letter has a job.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>keel · MIT license · © 2026 Federico Gabrielli</span>
+    <span><a href="https://github.com/matrixfede/keel">github.com/matrixfede/keel</a> · grew out of <em>Agents, Loops, Graphs</em> (A. Figura, 2026)</span>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="keel">
+  <rect x="0" y="0" width="120" height="120" rx="26" fill="#B23A2F"/>
+  <path d="M22 54 Q60 26 98 54" fill="none" stroke="#FFF3F0" stroke-width="8" stroke-linecap="round"/>
+  <path d="M26 54 Q60 92 94 54 Z" fill="#FFF3F0"/>
+  <rect x="55" y="70" width="10" height="26" rx="2" fill="#10202B"/><rect x="42" y="92" width="36" height="9" rx="4.5" fill="#10202B"/>
+</svg>

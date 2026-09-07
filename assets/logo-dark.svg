@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" width="320" height="120" role="img" aria-label="keel">
+  <title>keel</title>
+  <path d="M18 56 Q64 26 110 56" fill="none" stroke="#E6ECEF" stroke-width="7" stroke-linecap="round"/>
+  <path d="M0 56 H128" stroke="#6FB3D2" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <path d="M22 56 Q64 92 106 56 Z" fill="#E6ECEF"/>
+  <rect x="59" y="72" width="10" height="30" rx="2" fill="#E0604B"/><rect x="47" y="98" width="34" height="9" rx="4.5" fill="#E0604B"/>
+  <text x="150" y="80" font-family="Bricolage Grotesque, Helvetica Neue, Arial, sans-serif" font-weight="800" font-size="64" letter-spacing="-3" fill="#E6ECEF">keel</text>
+</svg>

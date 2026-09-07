@@ -1,6 +1,13 @@
-# keel
+<p align="left">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+    <img src="assets/logo.svg" alt="keel" width="240">
+  </picture>
+</p>
 
 **A plan-driven operating layer for coding agents — any agent, any model.**
+
+Site: [matrixfede.github.io/keel](https://matrixfede.github.io/keel/) · the same page, with the logo proposal and the diagrams, lives in [`docs/index.html`](docs/index.html).
 
 [![tests](https://github.com/matrixfede/keel/actions/workflows/ci.yml/badge.svg)](https://github.com/matrixfede/keel/actions/workflows/ci.yml)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)

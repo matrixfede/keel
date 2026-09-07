@@ -8,6 +8,8 @@ versions follow [Semantic Versioning](https://semver.org/).
 First public release, under the MIT license, as `keel`.
 
 ### Added
+- Visual identity: `assets/logo.svg`, `assets/logo-dark.svg`, `assets/icon.svg`; landing
+  page with explanatory diagrams in `docs/index.html` (GitHub Pages, source `docs/`).
 - `tests/run_tests.sh`: 61 end-to-end checks with fake agent backends (no CLI,
   no network); GitHub Actions on Ubuntu and macOS (bash 3.2) plus shellcheck.
 - `LICENSE` (MIT), `CONTRIBUTING.md`, `.editorconfig`, `.gitignore`.
