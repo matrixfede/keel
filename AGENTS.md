@@ -5,6 +5,14 @@ They apply to any agent (Codex, Claude Code, Gemini CLI, Cursor, Copilot,
 OpenCode, Aider, Pi...) and any model: this file follows the `AGENTS.md`
 standard; agents that do not read it natively get it through `adapters/`.
 
+**Where the pack lives.** keel is either copied into the project (then
+`scripts/`, `prompts/`, the templates and `docs/AGENT_SOP.md` are in the project
+root) or installed once as a Claude Code / Codex plugin (then they are in the
+plugin folder, announced at session start as the *keel home*, and reached with
+`bash "<keel home>/bin/keel" <verify|graph|check|premortem|fanout|health>`).
+Paths like `scripts/checker.sh` below mean "that file in the pack, wherever it
+lives". `PLAN.md`, `PROGRESS.md` and `logs/agent/` are always in the project.
+
 ---
 
 # ⛔ PLANNING GATE — read this before anything else

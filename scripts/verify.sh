@@ -7,7 +7,9 @@
 # consumer is an agent, not a human — every superfluous line is burned tokens.
 
 set -uo pipefail
-cd "$(dirname "$0")/.." || exit 1
+# shellcheck source=lib_paths.sh
+source "$(dirname "$0")/lib_paths.sh"
+cd "$KEEL_PROJECT" || exit 1
 
 MODE="${1:-all}"
 FAIL=0
@@ -35,7 +37,7 @@ if [[ "$MODE" == "static" || "$MODE" == "all" ]]; then
   fi
   # Plan graph (SOP-8): cycles, inconsistent groups, tasks without verification or contract.
   if [[ -f PLAN.md ]] && has python3; then
-    run python3 scripts/plan_graph.py --quiet
+    run python3 "$KEEL_HOME/scripts/plan_graph.py" --quiet
   fi
   # Forgotten debug prints.
   # The pattern is split ("AGENT""DBG") so this script does not match itself;

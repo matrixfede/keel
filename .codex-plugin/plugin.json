@@ -1,0 +1,28 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "keel",
+  "version": "1.1.0",
+  "description": "Plan-driven operating layer for coding agents: plan first and get it approved (PLAN.md DRAFT → APPROVED), verify before closing, append-only PROGRESS.md, hash-sealed fresh-context checker. Write-time gate via PreToolUse hook, commit-time gate via git.",
+  "author": { "name": "Federico Gabrielli", "url": "https://github.com/matrixfede" },
+  "homepage": "https://matrixfede.github.io/keel/",
+  "repository": "https://github.com/matrixfede/keel",
+  "license": "MIT",
+  "keywords": ["planning", "agents-md", "verification", "hooks", "workflow"],
+  "extensions": {
+    "com.openai": {
+      "hooks": "./hooks/hooks.json",
+      "interface": {
+        "displayName": "keel",
+        "shortDescription": "Plan first, approve, verify, log — the brake for coding agents.",
+        "longDescription": "keel makes a coding agent write PLAN.md and stop until you say go, verify every task before marking it done, keep an append-only PROGRESS.md, and never grade its own critical work (a fresh-context checker seals its verdict with the artifact's hash). Rules are injected at session start; the plan gate is enforced at write time (PreToolUse) and at commit time (git pre-commit hook installed by /keel:init).",
+        "developerName": "Federico Gabrielli",
+        "category": "Productivity",
+        "websiteURL": "https://matrixfede.github.io/keel/",
+        "defaultPrompt": [
+          "Set up keel in this project (/keel:init)",
+          "I have a problem to solve — write the plan first and wait for my go"
+        ]
+      }
+    }
+  }
+}

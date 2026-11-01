@@ -29,11 +29,14 @@ Warnings (non-blocking):
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
-PLAN = Path("PLAN.md")
+# The plan lives in the project root: the current folder, or KEEL_PROJECT when the
+# pack runs from elsewhere (plugin layout — see scripts/lib_paths.sh).
+PLAN = Path(os.environ.get("KEEL_PROJECT") or ".") / "PLAN.md"
 
 ROW_RE = re.compile(r"^\|\s*(\d+)\s*\|")
 GROUP_RE = re.compile(r"\[P(\d+)\]")

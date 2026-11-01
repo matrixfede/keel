@@ -20,8 +20,9 @@ do_claude() {
   echo "Claude Code:"
   put claude/CLAUDE.md CLAUDE.md
   put claude/claude-settings.json .claude/settings.json
-  chmod +x scripts/hooks/claude_gate.sh 2>/dev/null || true
-  echo "  (the PreToolUse hook enforces the gate at write time: scripts/hooks/claude_gate.sh)"
+  chmod +x scripts/hooks/keel_gate.sh scripts/hooks/claude_gate.sh 2>/dev/null || true
+  echo "  (the PreToolUse hook enforces the gate at write time: scripts/hooks/keel_gate.sh)"
+  echo "  (alternative without copying anything: install keel as a plugin — see README, \"Install as a plugin\")"
 }
 do_gemini() {
   echo "Gemini CLI:"

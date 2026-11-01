@@ -13,8 +13,8 @@ bash adapters/install_adapter.sh all         # all three
 
 | Agent | Reads `AGENTS.md`? | What it needs | Fresh session (`lib_agent.sh`) |
 |---|---|---|---|
-| **OpenAI Codex** (CLI/IDE) | yes, native | nothing | `codex exec` — OS sandbox, JSON schema |
-| **Claude Code** | no (reads `CLAUDE.md`) | `adapters/claude/CLAUDE.md` (`@AGENTS.md`) | `claude -p --restricted` / `acceptEdits` |
+| **OpenAI Codex** (CLI/IDE) | yes, native | nothing — or the keel plugin, which also adds the write-time gate | `codex exec` — OS sandbox, JSON schema |
+| **Claude Code** | no (reads `CLAUDE.md`) | the keel plugin (rules injected at session start), or `adapters/claude/CLAUDE.md` (`@AGENTS.md`) | `claude -p --restricted` / `acceptEdits`, or the plugin's `checker` subagent + `checker.sh --from` |
 | **Gemini CLI** | no (reads `GEMINI.md`) | `adapters/gemini/.gemini/settings.json` → `context.fileName: ["AGENTS.md","GEMINI.md"]` | `gemini -p --approval-mode plan\|yolo` |
 | **Cursor** (IDE and `cursor-agent`) | yes, native | nothing (`.cursor/rules` optional) | `custom` backend |
 | **GitHub Copilot** (CLI, coding agent) | yes, native | nothing | `copilot -p --allow-all-tools` |
@@ -51,11 +51,13 @@ export AGENT_CMD_WRITE='cd "$WORKDIR" && aider --yes-always --no-git --message "
 
 ## What depends on the agent
 
-- **The gate at write time** (not only at commit): only Claude Code exposes a
-  documented `PreToolUse` hook that can block Write/Edit while the plan is
-  DRAFT — it is in `adapters/claude/claude-settings.json` (copied to
-  `.claude/settings.json`) + `scripts/hooks/claude_gate.sh`. For the other
-  agents the gate remains an instruction plus the pre-commit hook.
+- **The gate at write time** (not only at commit): Claude Code and Codex expose
+  a `PreToolUse` hook that can block a write while the plan is DRAFT. One
+  script serves both, `scripts/hooks/keel_gate.sh` (`Write`/`Edit` paths in
+  Claude Code, file names parsed from the `apply_patch` text in Codex). It is
+  wired by the plugin (`hooks/hooks.json`) or, copy-in, by
+  `adapters/claude/claude-settings.json` → `.claude/settings.json`. For the
+  other agents the gate remains an instruction plus the pre-commit hook.
 - **The sandbox of parallel sessions**: Codex has an operating-system sandbox
   (`workspace-write`); Claude Code, Gemini and Copilot work with auto-approved
   permissions and no sandbox, so fan-out there calls for more caution (or a

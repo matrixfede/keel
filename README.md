@@ -24,6 +24,44 @@ python3 standard library, git.
 
 ## Install
 
+Two ways. **As a plugin** (Claude Code, Codex): installed once, used in every
+project, nothing copied. **Copied into the project**: the classic way, works
+with every agent, no plugin system needed. Both can coexist.
+
+### As a plugin (Claude Code · Codex)
+
+```bash
+# Claude Code — inside a session
+/plugin marketplace add matrixfede/keel
+/plugin install keel@keel
+
+# Codex — CLI or app
+codex plugin marketplace add matrixfede/keel     # or a local clone: codex plugin marketplace add /path/to/keel
+codex plugin add keel@keel
+
+# then, in each project where keel should be armed
+/keel:init                                       # .keel/ marker, logs/agent/, pre-commit hook
+```
+
+What the plugin does: at session start it injects `AGENTS.md` (only in projects
+that have `.keel/`, a `PLAN.md`, or keel's `AGENTS.md`; elsewhere a one-line hint),
+a `PreToolUse` hook enforces the planning gate at write time (`Write`/`Edit` in
+Claude Code, `apply_patch` in Codex), and six skills wrap the scripts:
+`/keel:init`, `/keel:status`, `/keel:check`, `/keel:premortem`, `/keel:fanout`,
+plus `keel` (the rules). Claude Code also gets two subagents, `checker` and
+`arguer`, for the fresh-context roles without a second CLI. The scripts run from
+the plugin folder against the current project:
+
+```bash
+bash "$CLAUDE_PLUGIN_ROOT/bin/keel" verify|graph|check|premortem|fanout|health|init|hook
+```
+
+The pre-commit hook installed by `/keel:init` carries its own copy of
+`plan_graph.py`, so a collaborator without the plugin — or CI — is held to the
+same four checks. To try a local clone without installing: `claude --plugin-dir /path/to/keel`.
+
+### Copied into the project (any agent)
+
 ```bash
 git clone https://github.com/matrixfede/keel.git /tmp/keel
 cd /path/to/your/project
@@ -90,7 +128,9 @@ human — commits.
 | `scripts/fanout.sh` | One session per task of a parallel group, then a model-free reduction → `FANOUT: PASS\|FAIL`. |
 | `scripts/lib_agent.sh` | The only place an agent CLI is invoked: `codex`, `claude`, `gemini`, `opencode`, `copilot`, `custom`. |
 | `scripts/install_git_hook.sh` | Pre-commit hook: no code while `DRAFT`; no critical `✅` without a valid verdict; no broken graph; no line removed from `PROGRESS.md`. |
-| `scripts/hooks/claude_gate.sh` | Claude Code only: the gate enforced at write time via `PreToolUse`. |
+| `scripts/hooks/keel_gate.sh` | The gate enforced at write time via `PreToolUse` (Claude Code, Codex); silent in projects that do not use keel. |
+| `bin/keel` · `scripts/init_project.sh` | One entry point for the scripts wherever the pack lives; `keel init` arms a project (marker, logs, pre-commit hook). |
+| `hooks/` · `skills/` · `agents/` | The plugin surface: session-start rules + write-time gate, six skills, two Claude Code subagents. Manifests in `.claude-plugin/`, `plugin.json`. |
 | `prompts/` | Role prompts — research, data, code, arguer (pre-mortem), checker (+ JSON schema). |
 | `adapters/` | Bridge files and the agent compatibility matrix. |
 | `tests/run_tests.sh` | 61 end-to-end checks; no agent CLI or network needed. |
@@ -152,8 +192,8 @@ agent. What varies is isolated in two places: how an agent reads `AGENTS.md`
 |---|---|---|
 | Codex app · Cursor · Windsurf · VS Code (Claude Code, Copilot) | native | as their CLIs, or `--prompt` / `--record` by hand |
 | Claude Desktop (Cowork), chat apps with a folder attached | first message: "Read `AGENTS.md`…" | `--prompt` / `--record` by hand |
-| OpenAI Codex | native | `codex exec`, OS sandbox, JSON schema |
-| Claude Code | `CLAUDE.md` bridge + write-time hook | `claude -p --restricted` |
+| OpenAI Codex | native · or plugin (rules + write-time hook) | `codex exec`, OS sandbox, JSON schema |
+| Claude Code | plugin (rules + write-time hook) · or `CLAUDE.md` bridge | `claude -p --restricted`, or the `checker` subagent |
 | Gemini CLI | `.gemini/settings.json` bridge | `gemini -p --approval-mode plan\|yolo` |
 | Cursor · GitHub Copilot · OpenCode · Pi | native | `copilot -p`, `opencode run`, or `custom` |
 | Aider | `.aider.conf.yml` bridge | `custom` |

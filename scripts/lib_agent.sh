@@ -90,7 +90,7 @@ agent_run() {
       # In write mode: edits auto-approved, shell limited to the pack's scripts.
       local a=(-p --output-format text --no-session-persistence)
       if [[ "$mode" == "readonly" ]]; then a+=(--restricted --tools "Read,Glob,Grep")
-      else a+=(--permission-mode acceptEdits --allowedTools "Bash(./scripts/*) Bash(bash scripts/*) Bash(python3 scripts/*)"); fi
+      else a+=(--permission-mode acceptEdits --allowedTools "Bash(./scripts/*) Bash(bash scripts/*) Bash(python3 scripts/*) Bash(${KEEL_HOME:-.}/scripts/*) Bash(bash ${KEEL_HOME:-.}/scripts/*) Bash(bash ${KEEL_HOME:-.}/bin/keel *) Bash(python3 ${KEEL_HOME:-.}/scripts/*)"); fi
       [[ -n "$model" ]] && a+=(--model "$model")
       (cd "$workdir" && "$AGENT_BIN" "${a[@]}" ${extra[@]+"${extra[@]}"} < "$prompt_file" > "$out_file" 2> "$log") ;;
 

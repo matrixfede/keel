@@ -1,0 +1,30 @@
+{
+  "description": "keel — rules at session start, planning gate at write time. Shared by Claude Code and Codex.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session_start.sh\"",
+            "timeout": 10,
+            "statusMessage": "keel: loading operating rules"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/keel_gate.sh\"",
+            "timeout": 10,
+            "statusMessage": "keel: planning gate"
+          }
+        ]
+      }
+    ]
+  }
+}

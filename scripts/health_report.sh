@@ -2,7 +2,9 @@
 # health_report.sh — compact snapshot of the project state.
 # Run at session start (SOP-2, resume protocol).
 
-cd "$(dirname "$0")/.." || exit 1
+# shellcheck source=lib_paths.sh
+source "$(dirname "$0")/lib_paths.sh"
+cd "$KEEL_PROJECT" || exit 1
 
 echo "═ HEALTH REPORT ═ $(date +%Y-%m-%dT%H:%M:%S%z)"
 
@@ -26,7 +28,7 @@ if [[ -f PLAN.md ]]; then
      printf "  #%-3s %-45s %s\n", $2, substr($3,1,45), $4}'
   echo "  ── open tasks: $(grep -cE '^\| *[0-9]+ .*(⬜|🔄|⛔)' PLAN.md)"
   if command -v python3 >/dev/null 2>&1; then
-    echo "  ── graph: $(python3 scripts/plan_graph.py --quiet 2>/dev/null | tail -1)"
+    echo "  ── graph: $(python3 "$KEEL_HOME/scripts/plan_graph.py" --quiet 2>/dev/null | tail -1)"
   fi
 else
   echo "  MISSING — create from PLAN.template.md before writing code"

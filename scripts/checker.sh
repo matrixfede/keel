@@ -15,20 +15,26 @@
 #       writes only the prompt (logs/agent/checker_task<N>.prompt.md) for a manual session
 #   scripts/checker.sh --record <task#> KEEP|DROP "<rationale>" <artifact> [...]
 #       records a verdict obtained by hand (same file, same hash: the hook sees no difference)
+#   scripts/checker.sh --from <task#> <response_file> <artifact> [...]
+#       reads a checker response saved from a session opened elsewhere (a Claude Code
+#       `checker` subagent, a web chat) and computes the verdict exactly as in run mode:
+#       the script decides, not the model — KEEP needs the model's KEEP AND 2 checks out of 3
 #
 # For a diff: first `git diff > logs/agent/task<N>.diff`, then pass that file.
 # Result: last line "CHECKER: KEEP" or "CHECKER: DROP" (exit 1) — "CHECKER: ERROR" (exit 2).
 
 set -uo pipefail
-cd "$(dirname "$0")/.." || exit 1
+# shellcheck source=lib_paths.sh
+source "$(dirname "$0")/lib_paths.sh"
+cd "$KEEL_PROJECT" || exit 1
 # shellcheck source=lib_agent.sh
-source "scripts/lib_agent.sh"
+source "$KEEL_HOME/scripts/lib_agent.sh"
 
 LOGDIR="logs/agent"; mkdir -p "$LOGDIR"
-PROMPT_TPL="prompts/checker.md"
-SCHEMA="prompts/checker.schema.json"
+PROMPT_TPL="$KEEL_HOME/prompts/checker.md"
+SCHEMA="$KEEL_HOME/prompts/checker.schema.json"
 
-usage() { sed -n '3,21p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
+usage() { sed -n '3,25p' "$0" | sed 's/^# \{0,1\}//'; exit 2; }
 
 write_verdict() {   # write_verdict <task> <mode> <checks> <verdict> <rationale> <art...>
   local task="$1" mode="$2" checks="$3" verdict="$4" rationale="$5"; shift 5
@@ -79,6 +85,7 @@ check_args() {      # every artifact must exist
 MODE_RUN=run
 if [[ "${1:-}" == "--prompt" ]]; then MODE_RUN=prompt; shift
 elif [[ "${1:-}" == "--record" ]]; then MODE_RUN=record; shift
+elif [[ "${1:-}" == "--from" ]]; then MODE_RUN=from; shift
 elif [[ "${1:-}" == "-h" || "${1:-}" == "--help" || $# -lt 2 ]]; then usage
 fi
 
@@ -94,6 +101,15 @@ if [[ "$MODE_RUN" == "record" ]]; then
   exit $?
 fi
 
+if [[ "$MODE_RUN" == "from" ]]; then
+  RESP="${1:-}"; shift || usage
+  [[ -f "$RESP" ]] || { echo "response file not found: $RESP"; echo "CHECKER: ERROR"; exit 2; }
+  [[ $# -ge 1 ]] || usage
+  check_args "$@"
+  OUT="$LOGDIR/checker_task${TASK}.raw.txt"
+  [[ "$(cd "$(dirname "$RESP")" && pwd)/$(basename "$RESP")" == "$(cd "$LOGDIR" && pwd)/$(basename "$OUT")" ]] || cp "$RESP" "$OUT"
+  SOURCE="external"
+else
 [[ $# -ge 1 ]] || usage
 check_args "$@"
 PROMPT="$LOGDIR/checker_task${TASK}.prompt.md"
@@ -102,7 +118,8 @@ build_prompt "$PROMPT" "$@"
 if [[ "$MODE_RUN" == "prompt" ]] || ! agent_available; then
   echo "  prompt written to $PROMPT"
   agent_available || agent_missing_hint "$PROMPT"
-  echo "  then: scripts/checker.sh --record $TASK KEEP|DROP \"<rationale>\" $*"
+  echo "  then: $(keel_cmd scripts/checker.sh) --record $TASK KEEP|DROP \"<rationale>\" $*"
+  echo "    or: $(keel_cmd scripts/checker.sh) --from $TASK <saved_response_file> $*   (the script computes the verdict)"
   echo "CHECKER: PROMPT"
   exit 0
 fi
@@ -117,6 +134,8 @@ echo "  checker running with $(agent_name) (new session, read-only, sees only: $
 if ! agent_run "$TMP" readonly "$PROMPT" "$OUT" "$SCHEMA"; then
   echo "  the agent ($(agent_name)) exited with an error — see ${OUT}.events.log"
   echo "CHECKER: ERROR"; exit 2
+fi
+SOURCE="$(agent_name)"
 fi
 
 # The final verdict is computed by the script, not the model:
@@ -176,4 +195,4 @@ if [[ "$VERDICT" == "ERROR" ]]; then
   echo "CHECKER: ERROR"; exit 2
 fi
 echo "  $CHECKS"
-write_verdict "$TASK" "$(agent_name)" "$CHECKS" "$VERDICT" "$RATIONALE" "$@"
+write_verdict "$TASK" "$SOURCE" "$CHECKS" "$VERDICT" "$RATIONALE" "$@"

@@ -46,7 +46,8 @@ it too: `/path/to/bash-3.2 tests/run_tests.sh`.
 
 The plan markers (`Plan status:`, `Depends on`, `## Contracts`, `shape:`,
 `critical`, `[Pn]`, the emoji statuses) are parsed by `plan_graph.py`,
-`fanout.sh`, `health_report.sh`, the pre-commit hook and `claude_gate.sh`.
+`fanout.sh`, `health_report.sh`, the pre-commit hook and `keel_gate.sh` — in both
+layouts, pack copied into the project and pack in its own folder (plugin).
 Change them in all five, update `PLAN.template.md`, and add a test. Bump the
 major version: existing `PLAN.md` files break.
 

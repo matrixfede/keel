@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# keel — one entry point for the pack's scripts, whatever folder the pack lives in.
+#
+# Usage:
+#   keel init                 set up the current project: .keel/ marker, logs/agent/, .gitignore, pre-commit hook
+#   keel hook                 (re)install the pre-commit hook only
+#   keel verify [mode]        scripts/verify.sh            → VERIFY: PASS|FAIL
+#   keel graph [args]         scripts/plan_graph.py        → GRAPH: OK|FAIL
+#   keel check <n> <file>..   scripts/checker.sh           → CHECKER: KEEP|DROP   (also --prompt / --record / --from)
+#   keel premortem [--prompt] scripts/premortem.sh         → PREMORTEM: DONE
+#   keel fanout P1 [mode]     scripts/fanout.sh            → FANOUT: PASS|FAIL
+#   keel health               scripts/health_report.sh
+#   keel gate                 scripts/hooks/keel_gate.sh   (reads the hook JSON on stdin)
+#   keel home                 print the pack folder (KEEL_HOME)
+#   keel project              print the project folder (KEEL_PROJECT)
+#
+# As a Claude Code / Codex plugin: bash "${CLAUDE_PLUGIN_ROOT}/bin/keel" <command>
+# Copied into the project:          bash bin/keel <command>   (or the scripts directly, as before)
+
+set -uo pipefail
+# shellcheck source=../scripts/lib_paths.sh
+source "$(cd "$(dirname "$0")/.." && pwd)/scripts/lib_paths.sh"
+S="$KEEL_HOME/scripts"
+
+cmd="${1:-help}"; shift || true
+case "$cmd" in
+  init)      exec bash "$S/init_project.sh" "$@" ;;
+  hook)      exec bash "$S/install_git_hook.sh" "$@" ;;
+  verify)    exec bash "$S/verify.sh" "$@" ;;
+  graph)     cd "$KEEL_PROJECT" && exec python3 "$S/plan_graph.py" "$@" ;;
+  check|checker) exec bash "$S/checker.sh" "$@" ;;
+  premortem) exec bash "$S/premortem.sh" "$@" ;;
+  fanout)    exec bash "$S/fanout.sh" "$@" ;;
+  health)    exec bash "$S/health_report.sh" "$@" ;;
+  gate)      exec bash "$S/hooks/keel_gate.sh" "$@" ;;
+  home)      echo "$KEEL_HOME" ;;
+  project)   echo "$KEEL_PROJECT" ;;
+  help|-h|--help) sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) echo "keel: unknown command '$cmd' (keel help)"; exit 2 ;;
+esac

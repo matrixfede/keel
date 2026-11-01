@@ -16,9 +16,11 @@
 #         "PREMORTEM: ERROR" (exit 2).
 
 set -uo pipefail
-cd "$(dirname "$0")/.." || exit 1
+# shellcheck source=lib_paths.sh
+source "$(dirname "$0")/lib_paths.sh"
+cd "$KEEL_PROJECT" || exit 1
 # shellcheck source=lib_agent.sh
-source "scripts/lib_agent.sh"
+source "$KEEL_HOME/scripts/lib_agent.sh"
 
 LOGDIR="logs/agent"; mkdir -p "$LOGDIR"
 [[ -f PLAN.md ]] || { echo "PLAN.md missing: the pre-mortem runs on the plan, create it first."; echo "PREMORTEM: ERROR"; exit 2; }
@@ -28,7 +30,7 @@ PROMPT="$LOGDIR/premortem_${STAMP}.prompt.md"
 OUT="$LOGDIR/premortem_${STAMP}.md"
 
 {
-  cat prompts/arguer.md
+  cat "$KEEL_HOME/prompts/arguer.md"
   echo; echo "---"; echo
   echo "# The plan to attack (PLAN.md, as it is now)"; echo
   cat PLAN.md

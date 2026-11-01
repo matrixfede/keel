@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash scripts/hooks/claude_gate.sh"
+            "command": "bash scripts/hooks/keel_gate.sh"
           }
         ]
       }

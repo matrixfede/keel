@@ -19,22 +19,24 @@
 # Result: last line "FANOUT: PASS" or "FANOUT: FAIL" (exit 1) — "FANOUT: PROMPT" / "FANOUT: ERROR".
 
 set -uo pipefail
-cd "$(dirname "$0")/.." || exit 1
+# shellcheck source=lib_paths.sh
+source "$(dirname "$0")/lib_paths.sh"
+cd "$KEEL_PROJECT" || exit 1
 # shellcheck source=lib_agent.sh
-source "scripts/lib_agent.sh"
+source "$KEEL_HOME/scripts/lib_agent.sh"
 
 GROUP="${1:-}"; MODE="${2:-run}"
 FANOUT_MAX="${FANOUT_MAX:-4}"
 LOGDIR="logs/agent"; mkdir -p "$LOGDIR"
-pg() { python3 scripts/plan_graph.py "$@"; }   # a function, not a string: bash 3.2 + temporary IFS would not split a string
+pg() { python3 "$KEEL_HOME/scripts/plan_graph.py" "$@"; }   # a function, not a string: bash 3.2 + temporary IFS would not split a string
 
 die() { echo "  $1"; echo "FANOUT: ERROR"; exit 2; }
 
-[[ "$GROUP" =~ ^P[0-9]+$ ]] || die "name the group, e.g.: scripts/fanout.sh P1"
+[[ "$GROUP" =~ ^P[0-9]+$ ]] || die "name the group, e.g.: $(keel_cmd scripts/fanout.sh) P1"
 command -v python3 >/dev/null || die "python3 not found (needed to read PLAN.md)"
 [[ -f PLAN.md ]] || die "PLAN.md missing"
 grep -qi "Plan status:.*APPROVED" PLAN.md || die "the plan is not APPROVED: fan-out runs approved plans only"
-pg --quiet >/dev/null || die "the plan graph has errors: fix PLAN.md (python3 scripts/plan_graph.py)"
+pg --quiet >/dev/null || die "the plan graph has errors: fix PLAN.md (python3 $(keel_cmd scripts/plan_graph.py))"
 
 # shellcheck disable=SC2207  # bash 3.2 (macOS) has no mapfile; output is one integer per line
 TASKS=( $(pg --group "$GROUP") )
@@ -87,7 +89,7 @@ if [[ "$MODE" == "--prompt" ]] || { [[ "$MODE" == "run" ]] && ! agent_available;
   echo "  prompts written:"; for N in "${TASKS[@]}"; do echo "    $LOGDIR/fanout_${GROUP}_task${N}.prompt.md"; done
   agent_available || echo "  No agent CLI found (AGENT_BACKEND=${AGENT_BACKEND:-auto})."
   echo "  Open a NEW session for every prompt (one per task, all together); when they are done,"
-  echo "  run the reduction alone with: scripts/fanout.sh $GROUP --reduce"
+  echo "  run the reduction alone with: $(keel_cmd scripts/fanout.sh) $GROUP --reduce"
   echo "FANOUT: PROMPT"; exit 0
 fi
 

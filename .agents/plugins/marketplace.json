@@ -1,0 +1,12 @@
+{
+  "name": "keel",
+  "interface": { "displayName": "keel" },
+  "plugins": [
+    {
+      "name": "keel",
+      "source": { "source": "local", "path": "." },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Productivity"
+    }
+  ]
+}

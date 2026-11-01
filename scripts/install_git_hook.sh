@@ -13,19 +13,31 @@
 # It does not intercept writes to disk, only commits — but that is where
 # unapproved work becomes permanent, so it is the point that matters.
 #
-# Usage:  bash scripts/install_git_hook.sh
+# Usage:  bash scripts/install_git_hook.sh        (from the project; as a plugin: `keel hook`)
 # Bypass: git commit --no-verify   (for the cases where you know what you are doing)
+#
+# The hook must keep working when the pack is not in the project (plugin layout,
+# a collaborator without the plugin, a CI checkout): plan_graph.py is therefore
+# copied next to the hook, into the git hooks folder, and the hook uses that copy.
 
 set -euo pipefail
-cd "$(dirname "$0")/.." || exit 1
-[[ -d .git ]] || { echo "Not a git repository."; exit 1; }
+# shellcheck source=lib_paths.sh
+source "$(dirname "$0")/lib_paths.sh"
+cd "$KEEL_PROJECT" || exit 1
+git rev-parse --git-dir >/dev/null 2>&1 || { echo "Not a git repository: $KEEL_PROJECT"; exit 1; }
+HOOKS_DIR="$(git rev-parse --git-path hooks)"
 
-mkdir -p .git/hooks
-cat > .git/hooks/pre-commit <<'HOOK'
+mkdir -p "$HOOKS_DIR"
+cp "$KEEL_HOME/scripts/plan_graph.py" "$HOOKS_DIR/keel_plan_graph.py"
+cat > "$HOOKS_DIR/pre-commit" <<'HOOK'
 #!/usr/bin/env bash
 # Pre-commit hook of the plan-driven agent pack (keel). Four checks, all deterministic.
+# Self-contained: plan_graph.py is the copy installed next to this hook.
 
+cd "$(git rev-parse --show-toplevel)" || exit 1
 [[ -f PLAN.md ]] || exit 0
+PLAN_GRAPH="$(git rev-parse --git-path hooks)/keel_plan_graph.py"
+[[ -f "$PLAN_GRAPH" ]] || PLAN_GRAPH="scripts/plan_graph.py"
 
 STAGED=$(git diff --cached --name-only | grep -v '^PLAN.md$' | grep -v '^PLAN_ARCHIVE.md$' | grep -v '^PROGRESS.md$' || true)
 
@@ -63,7 +75,7 @@ while IFS= read -r line; do
   n=$(echo "$line" | awk -F'|' '{gsub(/ /,"",$2); print $2}')
   [[ "$n" =~ ^[0-9]+$ ]] || continue
   f="logs/agent/checker_task${n}.txt"
-  if [[ ! -f "$f" ]]; then BAD+="  task $n: missing $f (run scripts/checker.sh $n <artifact>)"$'\n'; continue; fi
+  if [[ ! -f "$f" ]]; then BAD+="  task $n: missing $f (run the keel checker: scripts/checker.sh $n <artifact>, or /keel:check)"$'\n'; continue; fi
   if ! grep -q '^VERDICT: KEEP' "$f"; then BAD+="  task $n: verdict in $f is not KEEP"$'\n'; continue; fi
   art=""
   while IFS= read -r vl; do
@@ -73,7 +85,7 @@ while IFS= read -r line; do
         want="${vl#SHA256: }"
         if [[ ! -f "$art" ]]; then BAD+="  task $n: the reviewed artifact no longer exists: $art"$'\n'
         elif [[ "$(sha256_of "$art")" != "$want" ]]; then
-          BAD+="  task $n: $art changed after the checker's review — rerun scripts/checker.sh $n $art"$'\n'
+          BAD+="  task $n: $art changed after the checker's review — rerun the keel checker on $art (task $n)"$'\n'
         fi ;;
     esac
   done < "$f"
@@ -96,8 +108,8 @@ MSG
 fi
 
 # --- Check 3: plan graph ---
-if command -v python3 >/dev/null 2>&1 && [[ -f scripts/plan_graph.py ]]; then
-  if ! OUT=$(python3 scripts/plan_graph.py --quiet 2>&1); then
+if command -v python3 >/dev/null 2>&1 && [[ -f "$PLAN_GRAPH" ]]; then
+  if ! OUT=$(python3 "$PLAN_GRAPH" --quiet 2>&1); then
     cat >&2 <<'MSG'
 
   COMMIT BLOCKED — the plan graph has errors (SOP-8).
@@ -105,7 +117,7 @@ if command -v python3 >/dev/null 2>&1 && [[ -f scripts/plan_graph.py ]]; then
 MSG
     echo "$OUT" | sed 's/^/  /' >&2
     echo >&2
-    echo "  Fix PLAN.md (python3 scripts/plan_graph.py for details). Bypass: git commit --no-verify" >&2
+    echo "  Fix PLAN.md (python3 $PLAN_GRAPH for details). Bypass: git commit --no-verify" >&2
     echo >&2
     exit 1
   fi
@@ -134,7 +146,7 @@ fi
 exit 0
 HOOK
 
-chmod +x .git/hooks/pre-commit
-echo "Pre-commit hook installed in .git/hooks/pre-commit"
+chmod +x "$HOOKS_DIR/pre-commit"
+echo "Pre-commit hook installed in $HOOKS_DIR/pre-commit (plan_graph.py copied alongside)"
 echo "Checks: plan in DRAFT · checker with hash for critical tasks · plan graph · PROGRESS.md append-only"
 echo "Test:  git commit --allow-empty -m test   (must pass: no code files)"
