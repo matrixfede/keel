@@ -7,15 +7,15 @@
 # call the same three functions (agent_available, agent_run, agent_missing_hint).
 #
 # Environment variables (all optional):
-#   AGENT_BACKEND   codex | claude | gemini | opencode | copilot | custom | auto (default: auto)
-#                   auto = the first available in this order: codex, claude, gemini, opencode, copilot
+#   AGENT_BACKEND   codex | claude | agy | gemini | opencode | copilot | custom | auto (default: auto)
+#                   auto = the first available in this order: codex, claude, agy, gemini, opencode, copilot
 #   AGENT_MODEL     model to pass to the backend (default: the one configured in the agent)
 #   AGENT_FLAGS     extra flags appended to the backend command (default: empty)
 #   AGENT_BIN       binary name/path, if different from the backend default
 #   AGENT_CMD_READONLY / AGENT_CMD_WRITE   (custom backend only) bash command receiving the
 #                   variables PROMPT_FILE, WORKDIR, OUT_FILE and MODEL — e.g. for pi, aider, cursor-agent
 #
-# Flags verified on: codex-cli 0.153, claude-code 2.1, gemini-cli 0.58, opencode 1.18, copilot-cli 1.0.
+# Flags verified on: codex-cli 0.153, claude-code 2.1, agy 1.5, gemini-cli 0.58, opencode 1.18, copilot-cli 1.0.
 # If your version differs, fix it HERE, in one place.
 #
 # Contract of agent_run <workdir> <mode> <prompt_file> <out_file> [schema_file]:
@@ -24,14 +24,14 @@
 #             the context fresh, whatever the agent.
 #   mode      readonly | write
 #   out_file  where the agent's final message lands (text)
-#   schema    optional JSON Schema: used where the backend supports it (codex); elsewhere
+#   schema    optional JSON Schema: used where the backend supports it (codex, agy); elsewhere
 #             the prompt asks for JSON and the reader extracts it tolerantly.
 #   Backend diagnostics in <out_file>.events.log.
 
 _agent_pick() {
   local b="${AGENT_BACKEND:-auto}"
   if [[ "$b" != "auto" ]]; then echo "$b"; return; fi
-  for c in codex claude gemini opencode copilot; do
+  for c in codex claude agy gemini opencode copilot; do
     command -v "$c" >/dev/null 2>&1 && { echo "$c"; return; }
   done
   echo "none"
@@ -40,7 +40,7 @@ AGENT="$(_agent_pick)"
 
 _agent_default_bin() {
   case "$AGENT" in
-    codex) echo codex ;; claude) echo claude ;; gemini) echo gemini ;;
+    codex) echo codex ;; claude) echo claude ;; agy) echo agy ;; gemini) echo gemini ;;
     opencode) echo opencode ;; copilot) echo copilot ;; *) echo "" ;;
   esac
 }
@@ -94,6 +94,16 @@ agent_run() {
       [[ -n "$model" ]] && a+=(--model "$model")
       (cd "$workdir" && "$AGENT_BIN" "${a[@]}" ${extra[@]+"${extra[@]}"} < "$prompt_file" > "$out_file" 2> "$log") ;;
 
+    agy)
+      # Google Antigravity CLI: --mode plan + --sandbox for read-only; --mode auto for unattended write;
+      # native --json-schema support for structured checker verdicts.
+      local m="plan" perm=(--sandbox)
+      if [[ "$mode" == "write" ]]; then m="auto"; perm=(--dangerously-skip-permissions); fi
+      local a=(-p "$(cat "$prompt_file")" --mode "$m" "${perm[@]}" --output-format text --disable-slash-commands)
+      [[ -n "$model" ]] && a+=(--model "$model")
+      [[ -n "$schema" ]] && a+=(--json-schema "$schema")
+      (cd "$workdir" && "$AGENT_BIN" "${a[@]}" ${extra[@]+"${extra[@]}"} < /dev/null > "$out_file" 2> "$log") ;;
+
     gemini)
       # --approval-mode plan = read-only; yolo = everything auto-approved. The prompt comes from stdin.
       local am="plan"; [[ "$mode" == "write" ]] && am="yolo"
@@ -129,7 +139,7 @@ agent_run() {
 agent_missing_hint() {
   local prompt_file="$1"
   cat <<MSG
-  No agent CLI found (codex, claude, gemini, opencode, copilot; AGENT_BACKEND=${AGENT_BACKEND:-auto}).
+  No agent CLI found (codex, claude, agy, gemini, opencode, copilot; AGENT_BACKEND=${AGENT_BACKEND:-auto}).
   The fresh-context session must be opened by hand, with any agent:
   1. Open a NEW session (empty chat, not the working one).
   2. Paste the content of: $prompt_file

@@ -3,6 +3,35 @@
 All notable changes to keel. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-11-24
+
+Google Antigravity (`agy` CLI, IDE, Antigravity 2.0) plugin and headless CLI backend.
+
+### Added
+- Native Google Antigravity plugin support alongside Claude Code and Codex:
+  - Root `hooks.json` in Antigravity's lifecycle format (`SessionStart` + `PreToolUse`
+    matching `write_file`, `edit_file`, and CLI write step names).
+  - `plugin.json`: square `assets/icon.svg` logo, `displayName`, and `suggestedPrompts`
+    for Antigravity Customizations UI (`agy plugin validate` passes with 2 agents,
+    1 hook, 6 skills).
+- `agy` backend in `scripts/lib_agent.sh` (verified on `agy` 1.5): `--mode plan --sandbox`
+  for read-only fresh-context sessions, `--mode auto --dangerously-skip-permissions`
+  for unattended fan-out workers, and native `--json-schema` enforcement for `checker.sh`.
+- End-to-end tests in `tests/run_tests.sh` covering `agy` CLI invocation, Antigravity
+  `PreToolUse` JSON allow/deny/artifactDirectoryPath handling, and `SessionStart`
+  `injectSteps` JSON output.
+
+### Changed
+- `scripts/hooks/keel_gate.sh` and `scripts/hooks/session_start.sh` are now polymorphic:
+  they auto-detect Antigravity's camelCase JSON contracts (`toolCall` / `conversationId`)
+  and return structured JSON (`{"decision":"allow"|"deny"}` / `{"injectSteps":[...]}`),
+  while preserving plain-text / `exit 2` behaviour for Claude Code and Codex.
+- `agents/checker.md` and `agents/arguer.md` frontmatter updated to YAML array `tools:
+  [read_file, Read, Glob, Grep]` with `subagent: true` / `mainAgent: false`, loading
+  cleanly in both Antigravity and Claude Code.
+- Skill instructions (`skills/*/SKILL.md`) resolve the plugin root portably across
+  Claude Code, Codex, and Antigravity.
+
 ## [1.1.0] — 2026-09-28
 
 keel as a plugin — Claude Code and Codex — without giving up the copy-in install.

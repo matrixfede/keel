@@ -6,12 +6,13 @@ description: Run keel's fresh-context pre-mortem on PLAN.md before asking for th
 # /keel:premortem — attack the plan before the go (SOP-9)
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/bin/keel" premortem            # with an agent CLI; result in logs/agent/premortem_<stamp>.md
-bash "${CLAUDE_PLUGIN_ROOT}/bin/keel" premortem --prompt   # writes only the prompt, for a session opened by hand
+KEEL="${CLAUDE_PLUGIN_ROOT:-$HOME/.gemini/config/plugins/keel}"
+bash "$KEEL/bin/keel" premortem            # with an agent CLI; result in logs/agent/premortem_<stamp>.md
+bash "$KEEL/bin/keel" premortem --prompt   # writes only the prompt, for a session opened by hand
 ```
 
-Without a CLI, in Claude Code, launch the `arguer` subagent shipped by this plugin
-with the content of `PLAN.md` only — not the conversation it was born in, otherwise it
+Without a CLI, in Claude Code or Antigravity, launch the `arguer` subagent shipped by this plugin
+(via `invoke_subagent` in Antigravity) with the content of `PLAN.md` only — not the conversation it was born in, otherwise it
 just nods — and paste its answer into `logs/agent/premortem_<date>.md`.
 
 Then, in `PLAN.md` → Decisions, add the top three failure modes, one per line:

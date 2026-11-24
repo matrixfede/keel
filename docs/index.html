@@ -148,7 +148,7 @@
       <div>
         <p class="eyebrow">Plan-driven operating layer for coding agents</p>
         <h1>The part of the boat you never see<em>.</em></h1>
-        <p class="thesis">A keel keeps the hull on course when the wind pushes sideways. keel does that for Codex, Claude Code, Gemini CLI, Cursor, Copilot, OpenCode, Aider and Pi.</p>
+        <p class="thesis">A keel keeps the hull on course when the wind pushes sideways. keel does that for Codex, Claude Code, Antigravity, Gemini CLI, Cursor, Copilot, OpenCode, Aider and Pi.</p>
         <div class="install"><s>$</s> git clone https://github.com/matrixfede/keel.git /tmp/keel
 <s>$</s> cp -r /tmp/keel/{AGENTS.md,prompts,adapters,scripts,PLAN.template.md,PROGRESS.template.md} .
 <s>$</s> mkdir -p docs &amp;&amp; cp /tmp/keel/docs/AGENT_SOP.md docs/
@@ -379,7 +379,7 @@
       <p class="lede">Everything binding is markdown, standard python3 and git. What varies per agent is isolated in two places: how it reads <code>AGENTS.md</code> (<code>adapters/</code>) and how a fresh session is opened (<code>scripts/lib_agent.sh</code>, one backend per CLI plus <code>custom</code>). What an agent can't provide is documented, not faked.</p>
     </div>
     <div class="agents">
-      <span class="native">Codex</span><span class="native">Cursor</span><span class="native">GitHub Copilot</span><span class="native">OpenCode</span><span class="native">Pi</span>
+      <span class="native">Codex</span><span class="native">Antigravity</span><span class="native">Cursor</span><span class="native">GitHub Copilot</span><span class="native">OpenCode</span><span class="native">Pi</span>
       <span>Claude Code</span><span>Gemini CLI</span><span>Aider</span>
     </div>
     <p class="legend"><i></i> reads <code>AGENTS.md</code> natively · the others get a one-line bridge file from <code>adapters/install_adapter.sh</code></p>
@@ -407,7 +407,7 @@
       <div><div class="n">CHECK 3</div><h3>No broken graph</h3><p><code>plan_graph.py</code> must say <code>GRAPH: OK</code>: no cycles, no fake independence, no task without verification or contract.</p></div>
       <div><div class="n">CHECK 4</div><h3>No line removed from PROGRESS.md</h3><p>The log is append-only. A diff that deletes an entry is refused; you add an entry saying what changed and why.</p></div>
     </div>
-    <p class="legend" style="margin-top:14px">Claude Code additionally gets the gate at <em>write</em> time through a <code>PreToolUse</code> hook. Deliberate bypass everywhere: <code>git commit --no-verify</code>.</p>
+    <p class="legend" style="margin-top:14px">Claude Code, Codex and Antigravity additionally get the gate at <em>write</em> time through a <code>PreToolUse</code> hook. Deliberate bypass everywhere: <code>git commit --no-verify</code>.</p>
   </section>
 
 

@@ -6,7 +6,8 @@ description: Show the keel state snapshot of the project — plan status and ope
 # /keel:status — health report (SOP-2)
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/bin/keel" health
+KEEL="${CLAUDE_PLUGIN_ROOT:-$HOME/.gemini/config/plugins/keel}"
+bash "$KEEL/bin/keel" health
 ```
 
 Read it, then apply the resume protocol: `PLAN.md` is the source of truth over anything

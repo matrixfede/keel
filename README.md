@@ -9,10 +9,10 @@
 [![site](https://img.shields.io/badge/site-matrixfede.github.io%2Fkeel-2F6F8F)](https://matrixfede.github.io/keel/)
 
 keel is a small set of markdown rules, templates and shell scripts you drop into
-a repository so that a coding agent — Codex, Claude Code, Gemini CLI, Cursor,
-GitHub Copilot, OpenCode, Aider or Pi — works the same way on every complex
-task: **plan first, get the plan approved, verify before closing, keep an
-append-only record, and never grade its own work.**
+a repository so that a coding agent — Codex, Claude Code, Google Antigravity,
+Gemini CLI, Cursor, GitHub Copilot, OpenCode, Aider or Pi — works the same way on
+every complex task: **plan first, get the plan approved, verify before closing,
+keep an append-only record, and never grade its own work.**
 
 No framework, no server, no SDK. Markdown, bash (3.2+, a stock Mac is fine),
 python3 standard library, git.
@@ -24,11 +24,11 @@ python3 standard library, git.
 
 ## Install
 
-Two ways. **As a plugin** (Claude Code, Codex): installed once, used in every
-project, nothing copied. **Copied into the project**: the classic way, works
-with every agent, no plugin system needed. Both can coexist.
+Two ways. **As a plugin** (Claude Code, Codex, Google Antigravity): installed
+once, used in every project, nothing copied. **Copied into the project**: the
+classic way, works with every agent, no plugin system needed. Both can coexist.
 
-### As a plugin (Claude Code · Codex)
+### As a plugin (Claude Code · Codex · Antigravity)
 
 ```bash
 # Claude Code — inside a session
@@ -39,21 +39,27 @@ with every agent, no plugin system needed. Both can coexist.
 codex plugin marketplace add matrixfede/keel     # or a local clone: codex plugin marketplace add /path/to/keel
 codex plugin add keel@keel
 
+# Google Antigravity — CLI, IDE or 2.0 app
+git clone https://github.com/matrixfede/keel.git ~/.gemini/config/plugins/keel
+# (or from a local clone: agy plugin install /path/to/keel)
+
 # then, in each project where keel should be armed
-/keel:init                                       # .keel/ marker, logs/agent/, pre-commit hook
+/keel:init                                       # or keel-init skill: .keel/ marker, logs/agent/, pre-commit hook
 ```
 
 What the plugin does: at session start it injects `AGENTS.md` (only in projects
 that have `.keel/`, a `PLAN.md`, or keel's `AGENTS.md`; elsewhere a one-line hint),
 a `PreToolUse` hook enforces the planning gate at write time (`Write`/`Edit` in
-Claude Code, `apply_patch` in Codex), and six skills wrap the scripts:
-`/keel:init`, `/keel:status`, `/keel:check`, `/keel:premortem`, `/keel:fanout`,
-plus `keel` (the rules). Claude Code also gets two subagents, `checker` and
-`arguer`, for the fresh-context roles without a second CLI. The scripts run from
-the plugin folder against the current project:
+Claude Code, `apply_patch` in Codex, `write_file`/`edit_file` in Antigravity), and
+six skills wrap the scripts: `keel-init`, `keel-status`, `keel-check`,
+`keel-premortem`, `keel-fanout`, plus `keel` (the rules). Claude Code and
+Antigravity also get two subagents, `checker` and `arguer`, for the fresh-context
+roles without a second CLI. The scripts run from the plugin folder against the
+current project:
 
 ```bash
-bash "$CLAUDE_PLUGIN_ROOT/bin/keel" verify|graph|check|premortem|fanout|health|init|hook
+KEEL="${CLAUDE_PLUGIN_ROOT:-$HOME/.gemini/config/plugins/keel}"
+bash "$KEEL/bin/keel" verify|graph|check|premortem|fanout|health|init|hook
 ```
 
 The pre-commit hook installed by `/keel:init` carries its own copy of
@@ -126,14 +132,14 @@ human — commits.
 | `scripts/checker.sh` | Fresh-context hostile review of critical tasks; verdict file with the artifact's SHA-256 → `CHECKER: KEEP\|DROP`. |
 | `scripts/premortem.sh` | Plan pre-mortem from a fresh context → `PREMORTEM: DONE`. |
 | `scripts/fanout.sh` | One session per task of a parallel group, then a model-free reduction → `FANOUT: PASS\|FAIL`. |
-| `scripts/lib_agent.sh` | The only place an agent CLI is invoked: `codex`, `claude`, `gemini`, `opencode`, `copilot`, `custom`. |
+| `scripts/lib_agent.sh` | The only place an agent CLI is invoked: `codex`, `claude`, `agy`, `gemini`, `opencode`, `copilot`, `custom`. |
 | `scripts/install_git_hook.sh` | Pre-commit hook: no code while `DRAFT`; no critical `✅` without a valid verdict; no broken graph; no line removed from `PROGRESS.md`. |
-| `scripts/hooks/keel_gate.sh` | The gate enforced at write time via `PreToolUse` (Claude Code, Codex); silent in projects that do not use keel. |
+| `scripts/hooks/keel_gate.sh` | The gate enforced at write time via `PreToolUse` (Claude Code, Codex, Antigravity); silent in projects that do not use keel. |
 | `bin/keel` · `scripts/init_project.sh` | One entry point for the scripts wherever the pack lives; `keel init` arms a project (marker, logs, pre-commit hook). |
-| `hooks/` · `skills/` · `agents/` | The plugin surface: session-start rules + write-time gate, six skills, two Claude Code subagents. Manifests in `.claude-plugin/`, `plugin.json`. |
+| `hooks.json` · `hooks/` · `skills/` · `agents/` | The plugin surface: session-start rules + write-time gate, six skills, two subagents (`checker`, `arguer`). Manifests in `plugin.json`, `.claude-plugin/`, `.codex-plugin/`. |
 | `prompts/` | Role prompts — research, data, code, arguer (pre-mortem), checker (+ JSON schema). |
 | `adapters/` | Bridge files and the agent compatibility matrix. |
-| `tests/run_tests.sh` | 61 end-to-end checks; no agent CLI or network needed. |
+| `tests/run_tests.sh` | 70 end-to-end checks; no agent CLI or network needed. |
 
 ## What keel puts under each gear
 
@@ -190,6 +196,7 @@ agent. What varies is isolated in two places: how an agent reads `AGENTS.md`
 
 | Agent | `AGENTS.md` | Fresh sessions |
 |---|---|---|
+| Google Antigravity (CLI `agy`, IDE, 2.0 app) | native · or plugin (rules + write-time hook) | `agy -p`, `--sandbox`, `--json-schema`, or `checker` / `arguer` subagents |
 | Codex app · Cursor · Windsurf · VS Code (Claude Code, Copilot) | native | as their CLIs, or `--prompt` / `--record` by hand |
 | Claude Desktop (Cowork), chat apps with a folder attached | first message: "Read `AGENTS.md`…" | `--prompt` / `--record` by hand |
 | OpenAI Codex | native · or plugin (rules + write-time hook) | `codex exec`, OS sandbox, JSON schema |
@@ -211,7 +218,7 @@ is a JSON schema for structured checker responses.
 ## Tests
 
 ```bash
-bash tests/run_tests.sh        # 61 checks · fake agent backends · Ubuntu and macOS (bash 3.2) in CI
+bash tests/run_tests.sh        # 70 checks · fake agent backends · Ubuntu and macOS (bash 3.2) in CI
 ```
 
 ## License

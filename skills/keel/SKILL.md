@@ -6,8 +6,10 @@ description: Plan-driven operating rules for coding work — plan first in PLAN.
 # keel — the operating rules
 
 keel is installed as a plugin: the pack (rules, scripts, prompts, templates) lives in
-the plugin folder — the directory two levels above this file, `${CLAUDE_PLUGIN_ROOT}`
-in Claude Code — while `PLAN.md`, `PROGRESS.md` and `logs/agent/` live in the project.
+the plugin folder — the directory two levels above this file (`${CLAUDE_PLUGIN_ROOT}` in
+Claude Code, `~/.gemini/config/plugins/keel` in Antigravity, or the *keel home* path
+printed at session start) — while `PLAN.md`, `PROGRESS.md` and `logs/agent/` live in the
+project.
 
 ## Do this now
 

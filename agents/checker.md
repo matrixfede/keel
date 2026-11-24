@@ -1,8 +1,9 @@
 ---
 name: checker
 description: keel's hostile fresh-context checker (SOP-8). Give it ONLY the path(s) of the artifact to judge — no context, no summary of the work. It returns a JSON verdict (three checks + KEEP/DROP + rationale); record it with `keel check --from`.
-tools: Read, Glob, Grep
-model: inherit
+subagent: true
+mainAgent: false
+tools: [read_file, Read, Glob, Grep]
 ---
 
 You are a NEW session with no memory of how the artifact was produced. Read only the

@@ -11,12 +11,13 @@ task in the group has an output contract (file, shape, `check:`), at most `FANOU
 tasks (default 4).
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/bin/keel" fanout P1            # workers in parallel + reduction
-bash "${CLAUDE_PLUGIN_ROOT}/bin/keel" fanout P1 --prompt   # only the prompts, one manual session per task
-bash "${CLAUDE_PLUGIN_ROOT}/bin/keel" fanout P1 --reduce   # reduction only, after sessions run by hand
+KEEL="${CLAUDE_PLUGIN_ROOT:-$HOME/.gemini/config/plugins/keel}"
+bash "$KEEL/bin/keel" fanout P1            # workers in parallel + reduction
+bash "$KEEL/bin/keel" fanout P1 --prompt   # only the prompts, one manual session per task
+bash "$KEEL/bin/keel" fanout P1 --reduce   # reduction only, after sessions run by hand
 ```
 
-In Claude Code without a CLI: launch one subagent per prompt in `logs/agent/fanout_P1_task<n>.prompt.md`
+In Claude Code or Antigravity without a CLI: launch one subagent per prompt in `logs/agent/fanout_P1_task<n>.prompt.md`
 (all at once), then run `--reduce`. Workers never touch `PLAN.md` or `PROGRESS.md`.
 
 After `FANOUT: PASS` the main session runs each task's verification, marks ✅ and

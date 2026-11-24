@@ -7,11 +7,12 @@ argument-hint: "[project_dir]"
 
 # /keel:init — arm keel in this project
 
-Run, from the project root (the plugin root is `${CLAUDE_PLUGIN_ROOT}`, two levels
-above this file):
+Run, from the project root (`KEEL` is the plugin folder two levels above this `SKILL.md`
+— `${CLAUDE_PLUGIN_ROOT}` in Claude Code, `~/.gemini/config/plugins/keel` in Antigravity):
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/bin/keel" init
+KEEL="${CLAUDE_PLUGIN_ROOT:-$HOME/.gemini/config/plugins/keel}"
+bash "$KEEL/bin/keel" init
 ```
 
 It is idempotent. It creates in the project:

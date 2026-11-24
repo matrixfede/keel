@@ -13,6 +13,7 @@ bash adapters/install_adapter.sh all         # all three
 
 | Agent | Reads `AGENTS.md`? | What it needs | Fresh session (`lib_agent.sh`) |
 |---|---|---|---|
+| **Google Antigravity** (CLI `agy`, IDE, 2.0 app) | yes, native | nothing — or the keel plugin (`~/.gemini/config/plugins/keel`), which adds `hooks.json` write-time gate, 6 skills and `checker` / `arguer` subagents | `agy -p --mode plan --sandbox` / `--json-schema`, or subagents |
 | **OpenAI Codex** (CLI/IDE) | yes, native | nothing — or the keel plugin, which also adds the write-time gate | `codex exec` — OS sandbox, JSON schema |
 | **Claude Code** | no (reads `CLAUDE.md`) | the keel plugin (rules injected at session start), or `adapters/claude/CLAUDE.md` (`@AGENTS.md`) | `claude -p --restricted` / `acceptEdits`, or the plugin's `checker` subagent + `checker.sh --from` |
 | **Gemini CLI** | no (reads `GEMINI.md`) | `adapters/gemini/.gemini/settings.json` → `context.fileName: ["AGENTS.md","GEMINI.md"]` | `gemini -p --approval-mode plan\|yolo` |
@@ -26,8 +27,8 @@ bash adapters/install_adapter.sh all         # all three
 | **Claude Desktop (Cowork)**, chat apps with a folder attached | no | first message: "Read `AGENTS.md` and `docs/AGENT_SOP.md`, then: …" | `--prompt` / `--record` by hand (the app's shell can run the scripts) |
 
 CLIs whose non-interactive invocation was verified (real flags, not inferred):
-codex-cli 0.153, claude-code 2.1, gemini-cli 0.58, opencode 1.18, copilot-cli
-1.0. For the others use `AGENT_BACKEND=custom` with two commands:
+codex-cli 0.153, claude-code 2.1, agy 1.5, gemini-cli 0.58, opencode 1.18,
+copilot-cli 1.0. For the others use `AGENT_BACKEND=custom` with two commands:
 
 ```bash
 # example: pi coding agent
@@ -51,17 +52,20 @@ export AGENT_CMD_WRITE='cd "$WORKDIR" && aider --yes-always --no-git --message "
 
 ## What depends on the agent
 
-- **The gate at write time** (not only at commit): Claude Code and Codex expose
-  a `PreToolUse` hook that can block a write while the plan is DRAFT. One
-  script serves both, `scripts/hooks/keel_gate.sh` (`Write`/`Edit` paths in
-  Claude Code, file names parsed from the `apply_patch` text in Codex). It is
-  wired by the plugin (`hooks/hooks.json`) or, copy-in, by
+- **The gate at write time** (not only at commit): Claude Code, Codex and Google
+  Antigravity expose a `PreToolUse` hook that can block a write while the plan
+  is DRAFT. One script serves all three, `scripts/hooks/keel_gate.sh`
+  (`Write`/`Edit` paths in Claude Code, file names parsed from the `apply_patch`
+  text in Codex, `write_file`/`edit_file` camelCase `toolCall` payloads in
+  Antigravity). It is wired by the plugin (`hooks/hooks.json` for Claude/Codex,
+  root `hooks.json` for Antigravity) or, copy-in, by
   `adapters/claude/claude-settings.json` → `.claude/settings.json`. For the
   other agents the gate remains an instruction plus the pre-commit hook.
-- **The sandbox of parallel sessions**: Codex has an operating-system sandbox
-  (`workspace-write`); Claude Code, Gemini and Copilot work with auto-approved
-  permissions and no sandbox, so fan-out there calls for more caution (or a
-  container).
-- **Schema-constrained output**: Codex only (`--output-schema`). For the
-  others the prompt asks for JSON and `checker.sh` extracts it tolerantly; if
-  it cannot, `CHECKER: ERROR` and no verdict — never a guessed KEEP.
+- **The sandbox of parallel sessions**: Codex (`workspace-write`) and Antigravity
+  (`--sandbox` in read-only mode) provide built-in sandboxes; Claude Code, Gemini
+  and Copilot work with auto-approved permissions, so fan-out there calls for
+  more caution (or a container).
+- **Schema-constrained output**: Codex (`--output-schema`) and Antigravity
+  (`--json-schema`). For the others the prompt asks for JSON and `checker.sh`
+  extracts it tolerantly; if it cannot, `CHECKER: ERROR` and no verdict — never a
+  guessed KEEP.

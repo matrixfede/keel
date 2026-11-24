@@ -1,13 +1,20 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "keel",
-  "version": "1.1.0",
+  "displayName": "keel",
+  "version": "1.2.0",
   "description": "Plan-driven operating layer for coding agents: plan first and get it approved (PLAN.md DRAFT → APPROVED), verify before closing, append-only PROGRESS.md, hash-sealed fresh-context checker. Write-time gate via PreToolUse hook, commit-time gate via git.",
+  "logo": "assets/icon.svg",
+  "suggestedPrompts": [
+    "Set up keel in this project (/keel-init)",
+    "Show the current keel plan and progress status (/keel-status)",
+    "I have a problem to solve — write PLAN.md first and wait for my go"
+  ],
   "author": { "name": "Federico Gabrielli", "url": "https://github.com/matrixfede" },
   "homepage": "https://matrixfede.github.io/keel/",
   "repository": "https://github.com/matrixfede/keel",
   "license": "MIT",
-  "keywords": ["planning", "agents-md", "verification", "hooks", "workflow"],
+  "keywords": ["planning", "agents-md", "verification", "hooks", "workflow", "antigravity", "claude-code", "codex"],
   "extensions": {
     "com.openai": {
       "hooks": "./hooks/hooks.json",

@@ -50,7 +50,7 @@ echo "merged" > merged.txt
 
 # ── fake agent CLIs ─────────────────────────────────────────────────────────
 FAKE="$WORK/fakebin"; mkdir -p "$FAKE"; : > "$FAKE/argv.log"
-for c in codex claude gemini opencode copilot; do
+for c in codex claude agy gemini opencode copilot; do
 cat > "$FAKE/$c" <<'EOF'
 #!/usr/bin/env bash
 me=$(basename "$0"); echo "$me $*" >> "$(dirname "$0")/argv.log"
@@ -125,7 +125,7 @@ git checkout -q HEAD -- PROGRESS.md; git reset -q
 
 echo "─ checker.sh"
 PATH="$NOAGENT_PATH" bash scripts/checker.sh 3 merged.txt | expect "no agent → prompt mode" "CHECKER: PROMPT"
-for be in codex claude gemini opencode copilot; do
+for be in codex claude agy gemini opencode copilot; do
   PATH="$AGENT_PATH" AGENT_BACKEND=$be FAKE_ANSWER="Here you go:
 \`\`\`json
 $KEEP3
@@ -141,6 +141,7 @@ PATH="$AGENT_PATH" AGENT_BACKEND=claude FAKE_ANSWER='garbage' bash scripts/check
 PATH="$AGENT_PATH" AGENT_BACKEND=custom AGENT_CMD_READONLY='echo "$FAKE_ANSWER" > "$OUT_FILE"' AGENT_CMD_WRITE=true FAKE_ANSWER="$KEEP3" bash scripts/checker.sh 3 merged.txt | expect "custom backend" "CHECKER: KEEP"
 grep -q "codex exec --skip-git-repo-check --ephemeral --color never -C .* -s read-only -o .* --output-schema .*checker.schema.json -" "$FAKE/argv.log" && ok "codex argv: exec, read-only sandbox, -o, --output-schema" || bad "codex argv"
 grep -q "claude -p --output-format text --no-session-persistence --restricted --tools Read,Glob,Grep" "$FAKE/argv.log" && ok "claude argv: -p, --restricted, read tools only" || bad "claude argv"
+grep -q -- "--mode plan --sandbox --output-format text --disable-slash-commands --json-schema .*checker.schema.json" "$FAKE/argv.log" && ok "agy argv: -p, --mode plan --sandbox, --json-schema" || bad "agy argv"
 grep -q "gemini -p .* --approval-mode plan -o text" "$FAKE/argv.log" && ok "gemini argv: --approval-mode plan" || bad "gemini argv"
 grep -q "opencode run --dir .* --agent plan" "$FAKE/argv.log" && ok "opencode argv: run --agent plan" || bad "opencode argv"
 grep -q -- "--allow-all-tools --no-ask-user --deny-tool shell --deny-tool write" "$FAKE/argv.log" && ok "copilot argv: deny shell/write" || bad "copilot argv"
@@ -176,15 +177,24 @@ bash adapters/install_adapter.sh all | expect "install_adapter all" "created: .c
 [[ -f CLAUDE.md && -f .gemini/settings.json && -f .aider.conf.yml ]] && ok "bridge files created" || bad "bridge files"
 bash adapters/install_adapter.sh claude | expect "second run does not overwrite" "already exists"
 echo '{"tool_name":"Write","tool_input":{"file_path":"src/app.py"}}' | bash scripts/hooks/claude_gate.sh; [[ $? -eq 0 ]] && ok "claude_gate: APPROVED → allow" || bad "claude_gate approved"
+echo '{"toolCall":{"name":"write_file","args":{"Path":"src/app.py"}}}' | bash scripts/hooks/keel_gate.sh | expect "agy gate: APPROVED → JSON allow" '"decision":"allow"'
 sed -i.bak 's/APPROVED (2026-01-01)/DRAFT — awaiting approval/' PLAN.md && rm -f PLAN.md.bak
 echo '{"tool_name":"Write","tool_input":{"file_path":"src/app.py"}}' | bash scripts/hooks/claude_gate.sh 2>/dev/null; [[ $? -eq 2 ]] && ok "claude_gate: DRAFT → block (exit 2)" || bad "claude_gate draft"
 echo '{"tool_name":"Edit","tool_input":{"file_path":"/x/PLAN.md"}}' | bash scripts/hooks/claude_gate.sh; [[ $? -eq 0 ]] && ok "claude_gate: DRAFT but PLAN.md → allow" || bad "claude_gate plan"
+AGY_DENY=$(echo '{"toolCall":{"name":"write_file","args":{"Path":"src/app.py"}}}' | bash scripts/hooks/keel_gate.sh)
+[[ $? -eq 0 ]] && grep -q '"decision": "deny"' <<< "$AGY_DENY" && ok "agy gate: DRAFT → JSON deny (exit 0)" || bad "agy gate draft"
+echo '{"toolCall":{"name":"edit_file","args":{"Path":"/x/PLAN.md"}}}' | bash scripts/hooks/keel_gate.sh | expect "agy gate: DRAFT but PLAN.md → JSON allow" '"decision":"allow"'
+echo '{"toolCall":{"name":"write_file","args":{"Path":"/tmp/agy-brain/scratch.py"}},"artifactDirectoryPath":"/tmp/agy-brain"}' | bash scripts/hooks/keel_gate.sh | expect "agy gate: DRAFT but artifactDirectoryPath → JSON allow" '"decision":"allow"'
+NOKEEL="$WORK/nokeel"; mkdir -p "$NOKEEL"
+echo "{\"toolCall\":{\"name\":\"write_file\",\"args\":{\"Path\":\"$NOKEEL/a.py\"}},\"cwd\":\"$NOKEEL\"}" | KEEL_PROJECT="$NOKEEL" bash scripts/hooks/keel_gate.sh | expect "agy gate: non-keel folder → JSON allow" '"decision":"allow"'
+echo '{"conversationId":"c1","cwd":"'"$R"'"}' | bash scripts/hooks/session_start.sh | python3 -c 'import json,sys; d=json.load(sys.stdin); assert "[keel]" in d["injectSteps"][0]["systemMessage"]["systemMessage"]; print("AGY_SESSION_OK")' | expect "agy session_start → valid injectSteps JSON" "AGY_SESSION_OK"
+echo '{"cwd":"'"$R"'"}' | bash scripts/hooks/session_start.sh | expect "claude/codex session_start → plain text" "[keel] plugin active"
 git checkout -q HEAD -- PLAN.md
 
 echo "─ syntax"
 for f in scripts/*.sh scripts/hooks/*.sh adapters/*.sh; do bash -n "$f" || bad "syntax $f"; done; ok "bash -n on every script"
 python3 -m py_compile scripts/plan_graph.py scripts/agent_logging.py && ok "py_compile" || bad "py_compile"
-python3 -c 'import json,sys; [json.load(open(p)) for p in sys.argv[1:]]' prompts/checker.schema.json adapters/claude/claude-settings.json adapters/gemini/.gemini/settings.json && ok "json files parse" || bad "json"
+python3 -c 'import json,sys; [json.load(open(p)) for p in sys.argv[1:]]' prompts/checker.schema.json adapters/claude/claude-settings.json adapters/gemini/.gemini/settings.json hooks.json hooks/hooks.json plugin.json .claude-plugin/plugin.json .codex-plugin/plugin.json .agents/plugins/marketplace.json .claude-plugin/marketplace.json && ok "json files parse" || bad "json"
 
 PASS=$(grep -c '^ok$' "$RESULTS"); FAIL=$(grep -c '^bad$' "$RESULTS")
 echo

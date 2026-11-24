@@ -13,25 +13,28 @@ verdict (KEEP needs the model's KEEP and at least 2 checks out of 3) and seals i
 the artifact's SHA-256 in `logs/agent/checker_task<n>.txt`. The pre-commit hook reads
 that file; if the artifact changes afterwards the verdict expires.
 
-Plugin root: `${CLAUDE_PLUGIN_ROOT}`. For a diff, first `git diff > logs/agent/task<n>.diff`.
+Plugin root (`KEEL`): two levels above this file (`${CLAUDE_PLUGIN_ROOT}` in Claude Code,
+`~/.gemini/config/plugins/keel` in Antigravity). For a diff, first `git diff > logs/agent/task<n>.diff`.
 
 ## Preferred: a separate CLI session
 
 ```bash
-bash "${CLAUDE_PLUGIN_ROOT}/bin/keel" check <n> <artifact> [...]
+KEEL="${CLAUDE_PLUGIN_ROOT:-$HOME/.gemini/config/plugins/keel}"
+bash "$KEEL/bin/keel" check <n> <artifact> [...]
 ```
 
-Uses the first agent CLI found (codex, claude, gemini, opencode, copilot — `AGENT_BACKEND`
+Uses the first agent CLI found (codex, claude, agy, gemini, opencode, copilot — `AGENT_BACKEND`
 to choose) in a temporary folder holding only a copy of the artifact.
 
-## In Claude Code without a CLI session: the `checker` subagent
+## In Claude Code or Antigravity without a CLI session: the `checker` subagent
 
-1. Launch the `checker` subagent (shipped by this plugin) with the artifact path(s) —
-   nothing else: no summary of the work, no plan, no conversation.
+1. Launch the `checker` subagent (shipped by this plugin; via `invoke_subagent` in Antigravity)
+   with the artifact path(s) — nothing else: no summary of the work, no plan, no conversation.
 2. Save its final answer verbatim to `logs/agent/checker_task<n>.raw.txt`.
 3. Record it — the script parses it and decides:
    ```bash
-   bash "${CLAUDE_PLUGIN_ROOT}/bin/keel" check --from <n> logs/agent/checker_task<n>.raw.txt <artifact> [...]
+   KEEL="${CLAUDE_PLUGIN_ROOT:-$HOME/.gemini/config/plugins/keel}"
+   bash "$KEEL/bin/keel" check --from <n> logs/agent/checker_task<n>.raw.txt <artifact> [...]
    ```
 
 ## Afterwards

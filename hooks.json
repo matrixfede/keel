@@ -1,0 +1,23 @@
+{
+  "keel": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "bash ./scripts/hooks/session_start.sh",
+        "timeout": 10
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "write_file|edit_file|write_to_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ./scripts/hooks/keel_gate.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
